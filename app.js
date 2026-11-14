@@ -108,6 +108,7 @@ function vHome() {
       <div class="row">
         <a class="btn" href="#week"><i data-lucide="calendar-check"></i>Build my week</a>
         <a class="btn ghost" href="#course"><i data-lucide="flag"></i>Explore the course</a>
+        <a class="btn ghost" href="./dashboard/"><i data-lucide="chart-no-axes-combined"></i>Sponsor Dashboard</a>
         <a class="btn ghost" href="#checkin"><i data-lucide="qr-code"></i>Try QR check-in</a>
       </div>
     </div>
@@ -420,7 +421,7 @@ function vConsole() {
     { seg: 'Hospitality guests · 3 venues', who: 'Partner hospitality', msg: 'Thanks for joining us this week. Your host will follow up on future championship hospitality.', ch: 'Email' },
   ];
   $('#view').innerHTML = `<div class="wrap section">
-    <div class="season-head"><div><span class="eyebrow">Championship & Partner Console</span><h2 style="margin-top:8px">Live fan signal · Saturday, Round 3</h2></div><span class="tag sim"><i data-lucide="flask-conical" style="width:12px;height:12px"></i>Simulated stream + your real check-ins</span></div>
+    <div class="season-head"><div><span class="eyebrow">Championship & Partner Console</span><h2 style="margin-top:8px">Live fan signal · Saturday, Round 3</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="tag sim"><i data-lucide="flask-conical" style="width:12px;height:12px"></i>Simulated stream + your real check-ins</span><a class="btn" href="./dashboard/"><i data-lucide="chart-no-axes-combined"></i>Open Sponsor Dashboard</a></div></div>
     <div class="kpis">
       <div class="kpi"><span>Verified check-ins</span><b id="kT">${total.toLocaleString()}</b><em>live · sample</em></div>
       <div class="kpi"><span>Locations reporting</span><b>${locs.length}</b><em>across the campus</em></div>

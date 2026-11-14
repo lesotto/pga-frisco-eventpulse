@@ -1,0 +1,134 @@
+/* EventPulse Sponsor Intelligence — data layer.
+   kind: real (cited) | model (forecast from stated assumptions) | sim (generated in-browser) | co (company-reported) */
+window.D = (() => {
+  const S = {
+    cf: ['PGA Championship · Commercial Family', 'https://www.pgachampionship.com/commercial-family'],
+    sbj: ['Sports Business Journal, Nov 13 2026', 'https://www.sportsbusinessjournal.com/Articles/2026/11/13/pga-of-america-ready-for-frisco-closeup-with-2027-pga-championship/'],
+    fos: ['Front Office Sports, Sep 1 2026', 'https://frontofficesports.com/article/pga-america-ceo-talks-record-frisco-sales-ryder-cup-future/'],
+    vf: ['Visit Frisco', 'https://www.visitfrisco.com/node/3770'],
+    vfp: ['Visit Frisco · PGA Championship', 'https://www.visitfrisco.com/pga-championship'],
+    ig: ['Indian Gaming', 'https://www.indiangaming.com/choctaw-casinos-resorts-partners-with-2027-pga-championship/'],
+    choc: ['Choctaw Casinos & Resorts newsroom', 'https://www.choctawcasinos.com/newsroom/pga-of-america-announces-choctaw-casinos-resorts-as-an-official-community-partner-of-the-2027-pga-championship/'],
+    casino: ['Casino.org', 'https://www.casino.org/news/pga-championship-has-an-official-casino-resort-for-first-time/'],
+    ci: ['Community Impact', 'https://communityimpact.com/frisco/events/2027-pga-championship-demand-nears-sellout-in-frisco'],
+    dmn: ['Dallas Morning News', 'https://www.dallasnews.com/business/article/a-lot-stake-inside-planning-frisco-27-pga-22187682.php'],
+    dmnTix: ['Dallas Morning News · ticket prices', 'https://www.dallasnews.com/sports/golf/article/ticket-prices-2027-pga-championship-pga-frisco-22244125.php'],
+    dmnReg: ['Dallas Morning News · registration', 'https://www.dallasnews.com/sports/golf/article/pga-championship-2027-frisco-ticket-registration-22187483.php'],
+    dmnSched: ['Dallas Morning News · 2027 schedule', 'https://www.dallasnews.com/sports/golf/article/pga-tour-2027-schedule-dallas-fort-worth-dates-22404861.php'],
+    dmnPrep: ['Dallas Morning News · course prep', 'https://www.dallasnews.com/sports/golf/article/fields-ranch-east-s-preparation-pga-championship-22216395.php'],
+    dmnBundle: ['Dallas Morning News · KPMG bundle', 'https://www.dallasnews.com/sports/golf/2024/08/20/tickets-on-sale-for-2025-kpmg-womens-pga-championship-in-frisco-and-priority-access-to-2027-pga-championship/'],
+    tmo: ['T-Mobile investor news', 'https://investor.t-mobile.com/events-and-presentations/news/news-details/2026/T-Mobile-Is-Changing-How-Fans-Experience-the-PGA-Championship/default.aspx'],
+    digital: ['PGA.com · 2026 digital & broadcast', 'https://www.pga.com/story/2026-pga-championship-features-comprehensive-digital-and-broadcast-coverage-through-pgachampionship-com-app-social-media-espn-and-cbs'],
+    ceo: ['110th PGA Annual Meeting · CEO report', 'https://resources.pga.org/uploads/110th-pga-annual-meeting-ceo-report.pdf'],
+    ceo109: ['109th PGA Annual Meeting · CEO report', 'https://resources.pga.org/uploads/109th-pga-annual-meeting-written-report-of-ceo.pdf'],
+    legends: ['PGA.com · Legends', 'https://www.pga.com/story/pga-of-america-selects-legends-to-drive-global-partnerships'],
+    dnp: ['Delaware North', 'https://careers.delawarenorth.com/blog/what-is-it-like-to-work-the-2026-pga-championship-with-delaware-north-patina-group/'],
+    sg: ['SeatGeek', 'https://seatgeek.com/pga-championship-tickets'],
+    tix: ['PGA Championship · tickets', 'https://www.pgachampionship.com/tickets-2027'],
+    hosp: ['PGA Championship · hospitality', 'https://www.pgachampionship.com/news-media/articles/limited-corporate-hospitality-offerings-remain-for-2027-pga-championship-at-fields-ranch-east-at-pga-frisco'],
+    sched: ['2027 PGA TOUR schedule', 'https://internationalmedia.pgatour.com/uploads/other_resources/2027-pga-tour-regular-season-and-playoffs.pdf'],
+    playeasy: ['PlayEasy · Jason Mengel', 'https://www.playeasy.com/stories/inside-pga-frisco-the-road-to-the-2027-pga-championship-jason-mengel-pga-frisco'],
+    field: ['Visit Frisco · field', 'https://www.visitfrisco.com/blog/golf-shines-frisco-junior-play-to-pga-championship'],
+    boyd: ["Boyd's Bets", 'https://www.boydsbets.com/pga-championship-odds/'],
+    rai: ['PGA TOUR · AP', 'https://www.pgatour.com/article/news/daily-wrapup/2026/05/17/round-4-2026-pga-championship-aronimink-leaderboard-results-scores-final'],
+    notes: ['PGA TOUR final-round notes', 'https://pgatourmedia.pgatourhq.com/static-assets/page/files/tours/2026/pgatour/pgachampionship/roundInfo/R4_Notes.pdf'],
+    golfweek: ['Golfweek', 'https://golfweek.usatoday.com/story/sports/golf/lpga/2025/06/20/stacy-lewis-blames-six-hour-rounds-kpmg-womens-pga-poor-setup/84294179007/'],
+    city: ['City of Frisco · Demographics', 'https://www.friscotexas.gov/1454/Demographics'],
+    glance: ['Frisco at a Glance 2026', 'https://www.friscotexas.gov/DocumentCenter/View/4900/2026_At-A-Glance-PDF'],
+    retail: ['Frisco EDC · The Retail Coach', 'https://retail360.us/dashboard/FriscoTX/2026/FriscoTX_Demos_2026.pdf'],
+    nws: ['National Weather Service · DFW normals', 'https://www.weather.gov/fwd/dfw_records_normals'],
+    nwsMay: ['NWS · DFW May 2026 summary', 'https://forecast.weather.gov/product.php?site=JKL&issuedby=DFW&product=CLM&format=TXT&version=6&glossary=1'],
+    nbcStake: ['NBC 5 DFW', 'https://www.nbcdfw.com/news/sports/golf/a-lot-at-stake-behind-the-scenes-for-friscos-2027-pga-championship-prep/4054431/'],
+    nbcDemand: ['NBC 5 DFW', 'https://www.nbcdfw.com/news/local/record-demand-reported-for-2027-pga-championship-in-frisco/4054475'],
+    wfaaRory: ['WFAA (ABC 8)', 'https://www.wfaa.com/article/sports/golf/rory-mcilroy-pga-frisco-championship-major-golf-course-fields-ranch/287-c7f68e08-ee51-459e-bd01-56b078587e48'],
+    wfaaReg: ['WFAA (ABC 8)', 'https://www.wfaa.com/article/news/local/tickets-for-the-2027-pga-championship-are-now-open-the-historic-return-to-dallas-fort-worth-after-60-years/287-1e67f332-aa05-4196-a011-10e694a0385d'],
+    cbstx: ['CBS News Texas', 'https://www.cbsnews.com/texas/news/2027-pga-championship-frisco-dallas-golf-tickets'],
+    dmag: ['D Magazine', 'https://www.dmagazine.com/micropost/national-golf-writer-slams-fields-ranch-east/'],
+    friedegg: ['The Fried Egg', 'https://www.thefriedegg.com/articles/fields-ranch-east-pga-frisco-feelings'],
+    golfcom: ['GOLF.com', 'https://golf.com/news/pga-frisco-major-question-golf-departs/'],
+    gm: ['Golf Monthly', 'https://www.golfmonthly.com/news/which-course-hosts-the-2027-pga-championship-new-venue-one-pro-labeled-as-quite-boring-set-for-debut'],
+    quad: ['Geoff Shackelford · Substack', 'https://quadrilateral.substack.com/p/pga-should-hit-pause-on-frisco-events'],
+    gd: ['Golf Digest', 'https://www.golfdigest.com/courses/tx/fields-ranch-pga-of-america-frisco-east-course'],
+    cv: ['CourseVaults reviews', 'https://www.coursevaults.com/course/fields-ranch-east-at-pga-frisco-frisco-texas'],
+    r1: ['Reddit r/golf', 'https://www.reddit.com/r/golf/comments/1r7kpi3/fields_ranch_east/'],
+    r2: ['Reddit r/golf', 'https://www.reddit.com/r/golf/comments/1tce20x/pga_frisco_2027_championship/'],
+    r3: ['Reddit r/golf', 'https://www.reddit.com/r/golf/comments/1xj39pc/pga_frisco_day_23/'],
+    r4: ['Reddit r/golf', 'https://www.reddit.com/r/golf/comments/1xernoa/course_recommendations/'],
+    li: ['LinkedIn · Hunt Realty', 'https://www.linkedin.com/posts/huntrealtyinvestments_a-lot-at-stake-behind-the-scenes-for-friscos-activity-7451346825850306560-DIGR'],
+  };
+
+  // Official Commercial Family (pgachampionship.com/commercial-family) + Official Casino Resort (Choctaw announcement).
+  // w = relative activation weight used ONLY by the forecast model.
+  const sponsors = [
+    { n: 'Corebridge Financial', tier: 'Official Partner', cat: 'Financial', w: 1.0, c: '#4FD1E8', act: 'Official Partner of the PGA Championship.', s: 'cf' },
+    { n: 'Chase', tier: 'Official Partner', cat: 'Financial', w: 1.15, c: '#4FD1E8', act: 'Official Partner. Ran a cardholder-only ticket window on May 5–6, 2026: up to eight tickets per day, unlocked with the first six digits of the card.', s: 'dmnTix' },
+    { n: 'T-Mobile', tier: 'Official Partner', cat: 'Technology', w: 1.25, c: '#E84C9A', act: 'At Aronimink in 2026: Club Magenta on the 15th green, the Range Show, Seat Finder, the PGA Course Companion AI and a Smart Operations Command Center tracking crowds, entries and concessions. The Frisco plan has not been announced.', s: 'tmo' },
+    { n: 'CapTech', tier: 'Official Technology Services Agency', cat: 'Technology', w: .8, c: '#E84C9A', act: '"Plan Your Day" in the PGA Championships app builds custom real-time itineraries, new for 2026.', s: 'digital' },
+    { n: 'Choctaw Casinos & Resorts', tier: 'Official Casino Resort · Community Partner', cat: 'Hospitality', w: 1.2, c: '#F07A2A', act: 'The first official casino resort in the championship\'s history. Its all-inclusive Choctaw Ice House in the PGA District looks onto the 9th green, and daily VIP tickets sold out in three weeks. Also a branded photo op, casino-themed games and giveaways.', s: 'choc' },
+    { n: 'Rolex', tier: 'Partner', cat: 'Luxury', w: .9, c: '#8B5CF6', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Lexus', tier: 'Partner', cat: 'Automotive', w: .9, c: '#8B5CF6', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'KPMG', tier: 'Partner', cat: 'Professional services', w: .75, c: '#4FD1E8', act: 'Member of the Commercial Family. Title partner of the KPMG Women\'s PGA, played at Fields Ranch East in 2025.', s: 'cf' },
+    { n: 'Charles Schwab', tier: 'Partner', cat: 'Financial', w: .75, c: '#4FD1E8', act: 'Member of the Commercial Family. Its Challenge at Colonial follows the PGA the next week.', s: 'dmnSched' },
+    { n: 'theScore Bet', tier: 'Partner', cat: 'Betting', w: .85, c: '#22C08A', act: 'Live odds built into app scorecards and lockscreens, from 2026.', s: 'digital' },
+    { n: 'Twilio', tier: 'Partner', cat: 'Technology', w: .7, c: '#E84C9A', act: 'New technology partner. Runs "Birdies or Better," a donation to PGA REACH.', s: 'ceo' },
+    { n: 'LevelBlue', tier: 'Supplier', cat: 'Technology', w: .5, c: '#E84C9A', act: 'Cybersecurity supplier to the PGA Championship from 2026.', s: 'ceo109' },
+    { n: 'Toptracer', tier: 'Partner', cat: 'Technology', w: .6, c: '#E84C9A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Lexmark', tier: 'Partner', cat: 'Technology', w: .45, c: '#E84C9A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'American Airlines', tier: 'Partner', cat: 'Travel', w: .9, c: '#F07A2A', act: 'Member of the Commercial Family. DFW is American\'s hometown hub.', s: 'cf' },
+    { n: 'Airshare', tier: 'Partner', cat: 'Travel', w: .55, c: '#F07A2A', act: 'Member of the Commercial Family. More than 400 private jets are expected in DFW.', s: 'dmn' },
+    { n: 'On Location', tier: 'Partner', cat: 'Hospitality', w: .8, c: '#F07A2A', act: 'Member of the Commercial Family. Official premium travel and hospitality packages.', s: 'cf' },
+    { n: 'Club Car', tier: 'Partner', cat: 'Equipment', w: .5, c: '#8B5CF6', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Nike Golf', tier: 'Partner', cat: 'Equipment', w: .7, c: '#8B5CF6', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Michelob Ultra', tier: 'Partner', cat: 'Beverage', w: 1.0, c: '#22C08A', act: 'Member of the Commercial Family. Beer partner.', s: 'cf' },
+    { n: 'Pepsi', tier: 'Partner', cat: 'Beverage', w: .95, c: '#22C08A', act: 'Member of the Commercial Family. Soft drinks are part of the complimentary Championship+ offer.', s: 'cf' },
+    { n: "Tito's Handmade Vodka", tier: 'Partner', cat: 'Beverage', w: .7, c: '#22C08A', act: 'Member of the Commercial Family. An Austin, Texas brand.', s: 'cf' },
+    { n: 'High Noon', tier: 'Partner', cat: 'Beverage', w: .7, c: '#22C08A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Elijah Craig', tier: 'Partner', cat: 'Beverage', w: .55, c: '#22C08A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Sugarlands Shine', tier: 'Partner', cat: 'Beverage', w: .45, c: '#22C08A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'Goslings', tier: 'Partner', cat: 'Beverage', w: .45, c: '#22C08A', act: 'Member of the Commercial Family.', s: 'cf' },
+    { n: 'William Hill Estate', tier: 'Partner', cat: 'Beverage', w: .5, c: '#22C08A', act: 'Member of the Commercial Family. Wine.', s: 'cf' },
+  ];
+
+  const tixDays = [['Mon', 'May 17', 76], ['Tue', 'May 18', 91], ['Wed', 'May 19', 118], ['Thu', 'R1', 353], ['Fri', 'R2', 381], ['Sat', 'R3', 429], ['Sun', 'R4', 524]];
+  // modeled attendance split (sums to ~200K expected)
+  const att = [17000, 22000, 26000, 33500, 34000, 34000, 33500];
+
+  const mentions = [
+    { st: 'pos', topic: 'Demand', src: 'nbcDemand', q: 'Ticket purchases reached record levels nearly a year out. "Remaining inventory is becoming increasingly limited."' },
+    { st: 'pos', topic: 'Demand', src: 'sbj', q: 'Set a gross revenue record 10 months early, with revenue expected 10% to 20% above the 2026 record. "The response has been humbling." (Jason Mengel)' },
+    { st: 'pos', topic: 'Demand', src: 'fos', q: '"The enthusiasm for the 2027 PGA Championship has surpassed even any of our optimistic expectations." (Terry Clark, CEO)' },
+    { st: 'pos', topic: 'Community', src: 'cbstx', q: 'After a 64-year absence, one of golf\'s majors returns to North Texas.' },
+    { st: 'pos', topic: 'Community', src: 'nbcStake', q: 'Billed as the largest, most significant golf event in Texas history: 200,000 visitors and half a billion viewers worldwide.' },
+    { st: 'pos', topic: 'Community', src: 'li', q: 'Local real estate post: "bringing 200,000 visitors and $100M+ in economic impact for our region."' },
+    { st: 'pos', topic: 'Course', src: 'gd', q: 'Panelist: "an excellent example of contemporary golf architecture… it truly excels in shot options and variety."' },
+    { st: 'pos', topic: 'Course', src: 'cv', q: 'Reviewer: "It\'ll be a ball strikers paradise for the PGA Championship… Best public golf course in America."' },
+    { st: 'pos', topic: 'Course', src: 'r1', q: 'Golfer in 25–30 mph wind: "If the professionals encounter wind conditions similar… the 2027 tournament is sure to be exciting to watch."' },
+    { st: 'pos', topic: 'Course', src: 'r4', q: '"I found PGA Frisco East to be an excellent course, reasonably priced for a venue that hosts PGA championships."' },
+    { st: 'mix', topic: 'Venue', src: 'r3', q: 'Staff "very accommodating and pleasant," but "the surrounding area is quite dull," with reports of 6–7 hour public rounds.' },
+    { st: 'mix', topic: 'Course', src: 'golfcom', q: 'Minjee Lee\'s win was "overshadowed by griping" about setup. "PGA Frisco will have things to clean up before 2027."' },
+    { st: 'neg', topic: 'Course', src: 'wfaaRory', q: 'Rory McIlroy: "I\'d love to win a PGA at PGA Frisco — not," he said, laughing.' },
+    { st: 'neg', topic: 'Course', src: 'friedegg', q: 'Angel Yin called it "quite boring." Nelly Korda called some hole locations "almost impossible."' },
+    { st: 'neg', topic: 'Course', src: 'golfweek', q: 'Stacy Lewis said the setup was "making very good players look silly," blaming it for six-hour rounds.' },
+    { st: 'neg', topic: 'Venue', src: 'dmag', q: 'Geoff Shackelford flagged construction dust and noise, DFW approach flights, cicadas and uneven tees.' },
+    { st: 'neg', topic: 'Venue', src: 'quad', q: '"Unless the PGA of America can waive a wand… the 2027 PGA needs to be played somewhere else."' },
+    { st: 'neg', topic: 'Course', src: 'r2', q: 'r/golf thread on Frisco vs. Aronimink: "Uninspiring. Dull. Lacking personality."' },
+    { st: 'neg', topic: 'Course', src: 'gm', q: 'Headline: "New venue one pro labeled as \'quite boring\' set for debut."' },
+  ];
+
+  const promos = [
+    { n: 'Chase cardholder presale', who: 'Chase', when: 'May 5–6, 2026', d: 'Week-long access for Chase cardholders: up to eight tickets per day, unlocked with the first six digits of the card.', s: 'dmnTix', base: 0, unit: 'tickets', k: 'closed' },
+    { n: 'Free ticket registry', who: 'PGA of America', when: 'Apr 6 – May 18, 2026', d: 'A no-obligation queue that drew a record 155,000+ registrations.', s: 'ig', base: 155000, unit: 'registrations', k: 'closed' },
+    { n: '"Be There for Both" bundle', who: 'KPMG Women\'s PGA', when: '2024–25', d: 'For $270, two four-round tickets to the 2025 Women\'s PGA, plus priority access to 2027 PGA tickets.', s: 'dmnBundle', base: 0, unit: 'bundles', k: 'closed' },
+    { n: 'Choctaw Ice House photo op & games', who: 'Choctaw', when: 'Championship week', d: 'A branded photo op, casino-themed games and giveaways alongside the all-inclusive Ice House at the 9th green.', s: 'choc', base: 9000, unit: 'plays', k: 'live' },
+    { n: 'Club Magenta (2026 model)', who: 'T-Mobile', when: '2026 at Aronimink', d: 'Premium viewing for T-Mobile customers at the 15th green, with charging, giveaways and drink specials. The Frisco version has not been announced.', s: 'tmo', base: 12000, unit: 'visits', k: 'tba' },
+    { n: 'Birdies or Better', who: 'Twilio', when: 'Ongoing', d: 'A donation to PGA REACH for qualifying scores.', s: 'ceo', base: 0, unit: 'birdies', k: 'live' },
+    { n: 'Live odds in scorecards', who: 'theScore Bet', when: 'From 2026', d: 'Real-time betting markets inside player scorecards and on lockscreens in the official app.', s: 'digital', base: 40000, unit: 'odds taps', k: 'live' },
+    { n: 'Plan Your Day itineraries', who: 'CapTech', when: 'From 2026', d: 'Personal real-time itineraries in the official app, the same job the EventPulse guide does across the whole Frisco visit.', s: 'digital', base: 60000, unit: 'plans', k: 'live' },
+    { n: 'VendorMatch for local businesses', who: 'PGA of America · Frisco', when: '2026–27', d: 'Connects local businesses to championship procurement, alongside 1,300+ temporary jobs.', s: 'ci', base: 0, unit: 'vendors', k: 'live' },
+  ];
+
+  const odds = [['Scottie Scheffler', '+450', 18.2], ['Rory McIlroy', '+800', 11.1], ['Jon Rahm', '+1200', 7.7], ['Xander Schauffele', '+1600', 5.9], ['Ludvig Åberg', '+1800', 5.3], ['Cameron Young', '+1800', 5.3], ['Bryson DeChambeau', '+2200', 4.3], ['Tommy Fleetwood', '+2800', 3.4], ['Collin Morikawa', '+3300', 2.9], ['Matt Fitzpatrick', '+3300', 2.9], ['Justin Thomas', '+3300', 2.9], ['Sam Burns', '+3500', 2.8]];
+  const lb26 = [['1', 'Aaron Rai', '70-69-67-65', '271 (−9)'], ['T2', 'Jon Rahm', '69-70-67-68', '274 (−6)'], ['T2', 'Alex Smalley', '67-69-68-70', '274 (−6)'], ['T4', 'Justin Thomas', '69-69-72-65', '275 (−5)'], ['T4', 'Ludvig Åberg', '72-66-68-69', '275 (−5)'], ['T4', 'Matti Schmid', '69-72-65-69', '275 (−5)']];
+
+  return { S, sponsors, tixDays, att, mentions, promos, odds, lb26 };
+})();
