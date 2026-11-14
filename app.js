@@ -109,6 +109,7 @@ function vHome() {
         <a class="btn" href="#week"><i data-lucide="calendar-check"></i>Build my week</a>
         <a class="btn ghost" href="#course"><i data-lucide="flag"></i>Explore the course</a>
         <a class="btn ghost" href="./dashboard/"><i data-lucide="chart-no-axes-combined"></i>Sponsor Dashboard</a>
+        <a class="btn ghost" href="./agents/"><i data-lucide="bot"></i>Agentic Workforce</a>
         <a class="btn ghost" href="#checkin"><i data-lucide="qr-code"></i>Try QR check-in</a>
       </div>
     </div>

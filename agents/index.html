@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agentic Workforce · EventPulse · 2027 PGA Championship</title>
+<meta name="description" content="Deploy the EventPulse agentic workforce for the 2027 PGA Championship at PGA Frisco: twelve AI agents across fan experience, revenue, sponsors and operations, each with a human-approval boundary and a ledger entry for every action.">
+<meta name="theme-color" content="#07091a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23E84C9A'/><stop offset='1' stop-color='%23F07A2A'/></linearGradient></defs><rect width='32' height='32' rx='9' fill='url(%23g)'/><rect x='9' y='12' width='4' height='7' rx='2' fill='white'/><rect x='19' y='12' width='4' height='7' rx='2' fill='white'/></svg>">
+<link rel="stylesheet" href="./agents.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="../#home" aria-label="EventPulse home"><span class="bmark"><i></i><i></i></span><b>EVENTPULSE<em>.AI</em></b></a>
+  <nav class="links" aria-label="Site">
+    <a href="../#home">Guide</a>
+    <a href="../dashboard/">Sponsor Dashboard</a>
+    <a href="./" class="on" aria-current="page">Workforce</a>
+  </nav>
+  <button class="nav-cta" id="navDeploy">Deploy all</button>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow">Agentic Workforce · 2027 PGA Championship · PGA Frisco</p>
+    <h1>Twelve agents.<br><span class="grad">One championship.</span></h1>
+    <p class="lede">Deploy a full AI staff for championship week in a tap. Each agent owns one job, works inside a boundary you set, and writes every action to the Event Outcome Ledger.</p>
+    <div class="cta">
+      <button class="btn primary" id="deployAll">Deploy the workforce</button>
+      <a class="btn link" href="#how">How it stays accountable ›</a>
+    </div>
+    <div class="parade" id="parade" aria-hidden="true"></div>
+  </section>
+
+  <section class="sec" id="roster">
+    <div class="sec-h">
+      <div><p class="eyebrow">The roster</p><h2>Pick your team.</h2></div>
+      <div class="seg" id="teams" role="tablist" aria-label="Filter by team"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="sec" id="live">
+    <div class="sec-h">
+      <div><p class="eyebrow">Live workforce</p><h2>Watch them work.</h2></div>
+      <div class="simtag"><i></i>Simulated activity · not real data</div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="live-grid">
+      <div class="panel feed-p">
+        <div class="p-h"><h3>Activity ledger</h3><span class="mono" id="feedCount">0 entries</span></div>
+        <ol class="feed" id="feed"></ol>
+      </div>
+      <div class="panel appr-p">
+        <div class="p-h"><h3>Needs your approval</h3><span class="badge" id="apprN">0</span></div>
+        <div class="appr" id="appr"><p class="empty">Nothing waiting. Agents running on Approve will ask here before they act.</p></div>
+        <div class="kill"><div><b id="killT">Workforce running</b><span id="killS">Switch off to stop every agent and freeze the ledger.</span></div><button class="switch on" id="kill" role="switch" aria-checked="true" aria-label="Workforce running"><i></i></button></div>
+      </div>
+    </div>
+    <p class="fine">Simulated. Activity, counts, hours and approvals are generated in your browser to show how the workforce behaves during championship week. No agent is connected to PGA of America, PGA Frisco, ticketing, hospitality or sponsor systems.</p>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="sec-h"><div><p class="eyebrow">Accountable by design</p><h2>Every agent has a boundary.</h2></div></div>
+    <div class="pillars">
+      <div class="pillar"><span class="pi g1"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></span><h3>You set the autonomy.</h3><p>Suggest, Approve or Auto, per agent. Anything that spends money, messages fans at scale or changes the course waits for a person.</p></div>
+      <div class="pillar"><span class="pi g2"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg></span><h3>Every action is on the ledger.</h3><p>Who acted, on what data, under which rule, with whose approval. The same ledger feeds each sponsor's Event Outcome Score and ROI.</p></div>
+      <div class="pillar"><span class="pi g3"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4"/></svg></span><h3>One switch stops it all.</h3><p>Pause one agent or the whole workforce instantly. Agents hand anything outside their job to a named human, never guess.</p></div>
+    </div>
+  </section>
+</main>
+
+<div class="dock-wrap" aria-label="Live agents"><div class="dock" id="dock"><span class="dock-empty">Deployed agents appear here</span></div></div>
+
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shName" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer class="foot">
+  <p><b>A FuzeBox EventPulse demonstration.</b> Not affiliated with or endorsed by the PGA of America, the PGA Championship, PGA Frisco, Omni Hotels or any sponsor named. Agent designs are proposals. All workforce activity on this page is simulated and labeled as such. Event facts come from the <a href="https://www.pgachampionship.com/tickets-2027" target="_blank" rel="noopener">PGA Championship 2027 tickets page</a>, the <a href="https://www.pgachampionship.com/commercial-family" target="_blank" rel="noopener">Commercial Family page</a> and <a href="https://www.pgafrisco.com/faqs/" target="_blank" rel="noopener">PGA Frisco FAQs</a>.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="../dashboard/dash-data.js"></script>
+<script src="./agents.js"></script>
+</body>
+</html>
