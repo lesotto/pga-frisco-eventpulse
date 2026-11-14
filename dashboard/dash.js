@@ -94,7 +94,7 @@ function kpis() {
     ];
   }
   const el = $('#kpis'), prev = el.dataset.mode;
-  el.innerHTML = k.map(([kind, l, v, s, acc]) => `<div class="kpi ${kind}${prev === st.mode && kind === 'sim' ? ' flash' : ''}" style="--acc:${acc}"><i class="k-tag"></i><span>${l}</span><b>${v}</b><em>${s}</em></div>`).join('');
+  el.innerHTML = k.map(([kind, l, v, s, acc]) => `<div class="kpi ${kind}${prev === st.mode && kind === 'sim' ? ' flash' : ''}" style="--acc:${acc}"><i class="k-tag"></i><span>${l}</span><b>${v}</b><em>${s}${kind === 'sim' ? ' · <span class="t-sim">simulated</span>' : ''}</em></div>`).join('');
   el.dataset.mode = st.mode;
 }
 
@@ -103,7 +103,7 @@ const realTick = [
   ['RECORD', 'Gross revenue record set 10 months before first tee', 'SBJ'], ['SOLD OUT', 'All championship-round passes and all hospitality inventory sold', 'SBJ'],
   ['PARTNER', 'Choctaw named first official casino resort in the championship\'s 111-year history', 'Choctaw'], ['DEMAND', 'Corporate hospitality sold out faster than at any previous PGA Championship', 'FOS'],
   ['LOCAL', '1,300+ temporary jobs; VendorMatch connects local businesses', 'Community Impact'], ['TRAVEL', '400+ private jets expected into DFW', 'Dallas Morning News'],
-  ['MARKET', 'Scheffler +450 favorite; defending champion Aaron Rai', "Boyd's Bets"], ['SENTIMENT', 'Course critique persists from the 2025 Women\'s PGA; front and back nines swapped for 2027', 'Golfweek'],
+  ['MARKET', 'Scheffler +450 favorite; defending champion Aaron Rai', "Boyd's Bets"], ['COURSE', 'Front and back nines swapped for 2027 so more fans can see the finishing holes', 'Dallas Morning News'], ['SENTIMENT', 'Course critique persists from the 2025 Women\'s PGA', 'Golfweek'],
 ];
 function simTickItems() {
   const s = sponsors[Math.floor(Math.random() * sponsors.length)];
@@ -119,33 +119,44 @@ const cats = ['All', ...new Set(sponsors.map(s => s.cat))];
 function spFilters() { $('#spFilters').innerHTML = cats.map(c => `<button class="${c === st.cat ? 'on' : ''}" data-c="${c}">${c}</button>`).join(''); $$('#spFilters button').forEach(b => b.onclick = () => { st.cat = b.dataset.c; spFilters(); spGrid(); }); }
 function spGrid() {
   const list = sponsors.filter(s => st.cat === 'All' || s.cat === st.cat);
-  const max = Math.max(...sponsors.map(s => sp(s).exp));
-  $('#spGrid').innerHTML = list.map(s => { const m = sp(s); return `<button class="sp ${s.n === st.sel ? 'on' : ''}" data-n="${esc(s.n)}"><div class="nm"><i style="background:${s.c}"></i>${esc(s.n)}</div><div class="tr">${esc(s.tier)} · ${s.cat}</div><div class="mx"><span>${fmtK(m.exp)} exp</span><span>${fmtK(m.red)} red</span><span>${Math.round(m.sent)} sent</span></div><div class="bar"><span style="width:${(m.exp / max * 100).toFixed(1)}%"></span></div></button>`; }).join('');
+  const sim = st.mode === 'sim', max = Math.max(...sponsors.map(s => sp(s).exp));
+  $('#spGrid').innerHTML = list.map(s => { const m = sp(s);
+    const body = sim
+      ? `<div class="mx"><span>${fmtK(m.exp)} exp</span><span>${fmtK(m.red)} red</span><span>${Math.round(m.sent)} sent</span></div><div class="bar"><span style="width:${(m.exp / max * 100).toFixed(1)}%;background:linear-gradient(90deg,${s.c},#F5B83D)"></span></div><div class="simchip">Simulated</div>`
+      : `<div class="mx real"><span>Source · ${esc(S[s.s] ? S[s.s][0] : 'Commercial Family')}</span></div>`;
+    return `<button class="sp ${s.n === st.sel ? 'on' : ''}${sim ? ' is-sim' : ''}" data-n="${esc(s.n)}"><div class="nm"><i style="background:${s.c}"></i>${esc(s.n)}</div><div class="tr">${esc(s.tier)} · ${s.cat}</div>${body}</button>`; }).join('');
   $$('#spGrid .sp').forEach(b => b.onclick = () => { st.sel = b.dataset.n; spGrid(); spDetail(); });
 }
 function spDetail() {
   const s = sponsors.find(x => x.n === st.sel), m = sp(s);
-  const kind = st.mode === 'sim' ? '<span class="tag sim">Simulated · week to date</span>' : '<span class="tag model">Modeled · week forecast</span>';
-  $('#spDetail').innerHTML = `<div class="card-h"><span class="eyebrow">Sponsor ledger</span>${kind}</div>
+  if (charts.sp) { charts.sp.destroy(); charts.sp = null; }
+  if (st.mode !== 'sim') {
+    $('#spDetail').classList.remove('is-sim');
+    $('#spDetail').innerHTML = `<div class="card-h"><span class="eyebrow">Sponsor ledger</span><span class="tag real">Real · cited</span></div>
+      <h3>${esc(s.n)}</h3><div class="tr">${esc(s.tier)} · ${esc(s.cat)}</div>
+      <p>${esc(s.act)} ${src(s.s)}</p>
+      <div class="simph on"><span class="tag sim">Not measured yet</span><p>Exposure, behavior, sentiment and redemptions for ${esc(s.n)} start counting when fans use the guide during championship week. No real figures exist yet, so none are shown here.</p><button class="btn-sim" data-go-sim>See the simulated preview</button></div>`;
+    $$('#spDetail [data-go-sim]').forEach(b => b.onclick = () => setMode('sim'));
+    return;
+  }
+  $('#spDetail').classList.add('is-sim');
+  $('#spDetail').innerHTML = `<div class="card-h"><span class="eyebrow">Sponsor ledger</span><span class="tag sim">Simulated · not real data</span></div>
+    <div class="simban">Simulated · generated in your browser · not real data</div>
     <h3>${esc(s.n)}</h3><div class="tr">${esc(s.tier)}</div>
     <p>${esc(s.act)} ${src(s.s)}</p>
     <div class="ledger"><div><span>Exposure</span><b>${fmtK(m.exp)}</b></div><div><span>Behavior</span><b>${fmtK(m.beh)}</b></div><div><span>Sentiment</span><b>${Math.round(m.sent)}/100</b></div><div><span>Redemptions</span><b>${fmtK(m.red)}</b></div></div>
     <div class="chart xs"><canvas id="chSp"></canvas></div>
-    <p class="note">Exposure means impressions across the guide, on-site moments and digital. Behavior means visits, dwell time and taps. Redemptions are offers claimed. The model scales with activation size and modeled attendance by day. It is a forecast, not a measurement.</p>`;
+    <p class="note">Simulated. Exposure means impressions across the guide, on-site moments and digital. Behavior means visits, dwell time and taps. Redemptions are offers claimed. The numbers scale with activation size and a simulated attendance curve. They are not measurements.</p>`;
   const ctx = $('#chSp').getContext('2d');
   const hrs = hourCurve(h => Math.max(0, onGrounds(h * 60) / att[SAT]) * s.w * s.r * 100 * jitter(.08));
-  if (charts.sp) charts.sp.destroy();
-  charts.sp = new Chart(ctx, { type: 'line', data: { labels: hourCurve(h => (h > 12 ? h - 12 : h) + (h >= 12 ? 'p' : 'a')), datasets: [{ data: hrs, borderColor: s.c, backgroundColor: vgrad(ctx, s.c), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Engagement by hour · ' + (st.mode === 'sim' ? 'simulated Saturday' : 'modeled Saturday'), color: '#7a76a0', font: { size: 11 } } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
+  charts.sp = new Chart(ctx, { type: 'line', data: { labels: hourCurve(h => (h > 12 ? h - 12 : h) + (h >= 12 ? 'p' : 'a')), datasets: [{ data: hrs, borderColor: s.c, backgroundColor: vgrad(ctx, s.c), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Engagement by hour · ' + (st.mode === 'sim' ? 'simulated Saturday' : 'simulated Saturday'), color: '#7a76a0', font: { size: 11 } } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
 }
 function spCharts() {
-  const byCat = {}; sponsors.forEach(s => byCat[s.cat] = (byCat[s.cat] || 0) + sp(s).exp);
-  const e = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-  if (!charts.cat) { const ctx = $('#chCat').getContext('2d'); charts.cat = new Chart(ctx, { type: 'bar', data: { labels: e.map(x => x[0]), datasets: [{ data: e.map(x => x[1]), backgroundColor: grad(ctx, C.pink, C.orange), borderRadius: 6 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => fmtK(c.raw) + ' impressions' } } }, scales: { x: { ticks: { callback: v => fmtK(v) } }, y: { grid: { display: false } } } } }); }
-  else { charts.cat.data.labels = e.map(x => x[0]); charts.cat.data.datasets[0].data = e.map(x => x[1]); charts.cat.update('none'); }
+  if (!charts.cat) { const byCat = {}; sponsors.forEach(s => byCat[s.cat] = (byCat[s.cat] || 0) + 1); const e = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const ctx = $('#chCat').getContext('2d'); charts.cat = new Chart(ctx, { type: 'bar', data: { labels: e.map(x => x[0]), datasets: [{ data: e.map(x => x[1]), backgroundColor: grad(ctx, C.cyan, C.purple), borderRadius: 6 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + (c.raw === 1 ? ' partner' : ' partners') } } }, scales: { x: { ticks: { stepSize: 1, precision: 0 } }, y: { grid: { display: false } } } } }); }
   const t = sponsors.reduce((a, s) => { const m = sp(s); a.e += m.exp; a.b += m.beh; a.r += m.red; a.s += m.sent * s.w; a.w += s.w; return a; }, { e: 0, b: 0, r: 0, s: 0, w: 0 });
   const rows = [['Exposure · impressions', t.e, 100], ['Behavior · visits & dwell', t.b, t.b / t.e * 100 * 12], ['Sentiment · weighted net', t.s / t.w, t.s / t.w * .45], ['Redemptions · offers claimed', t.r, t.r / t.e * 100 * 40]];
   $('#funnel').innerHTML = rows.map(([l, v, w], i) => `<div class="f"><span style="width:${Math.min(100, w).toFixed(1)}%"></span><p>${l}<b>${i === 2 ? v.toFixed(1) + '/100' : fmtK(v)}</b></p></div>`).join('');
-  $$('[data-modetag]').forEach(t => { t.className = 'tag ' + (st.mode === 'sim' ? 'sim' : 'model'); t.textContent = st.mode === 'sim' ? 'Simulated' : 'Modeled'; });
 }
 
 /* ---------- ticketing ---------- */
@@ -173,7 +184,7 @@ function gateUpd() {
   charts.gate.data.datasets[0].data = gateData();
   charts.gate.data.datasets[0].backgroundColor = hourCurve(h => st.mode === 'sim' && Math.floor(st.simMin / 60) === h ? C.pink : 'rgba(245,184,61,.75)');
   charts.gate.update('none');
-  $('#gateNote').textContent = st.mode === 'sim' ? `Scanned today: ${fmt(att[SAT] * arrivedFrac(st.simMin))} of a modeled ${fmt(att[SAT])} Saturday crowd.` : `Modeled Saturday arrival curve for ${fmt(att[SAT])} fans. Switch to championship week to watch it fill in.`;
+  $('#gateNote').textContent = st.mode === 'sim' ? `Scanned today: ${fmt(att[SAT] * arrivedFrac(st.simMin))} of a simulated ${fmt(att[SAT])} Saturday crowd.` : `Simulated Saturday arrival curve for ${fmt(att[SAT])} fans. Switch to championship week to watch it fill in.`;
 }
 
 /* ---------- hospitality ---------- */
@@ -208,20 +219,18 @@ function concessions() {
     options: { plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmtK(c.raw) } } }, scales: { y: { stacked: true, ticks: { callback: v => fmtK(v) } }, x: { stacked: true, grid: { display: false } } } } });
   const A = attTot, alcN = A * CA.alcShare * CA.alcPer;
   $('#concCalc').innerHTML = [
-    ['Week attendance (modeled split)', fmt(A), ''], ['Free food items per fan', CA.food, ''], ['Free NA drinks per fan (May normal high 83.6°F)', CA.na, ''],
+    ['Week attendance (simulated daily split)', fmt(A), ''], ['Free food items per fan', CA.food, ''], ['Free NA drinks per fan (May normal high 83.6°F)', CA.na, ''],
     ['Fans buying alcohol', (CA.alcShare * 100) + '%', ''], ['Drinks per buyer', CA.alcPer, ''], ['Average drink price', '$' + CA.alcPrice, ''],
     ['Free units served', fmtK(A * (CA.food + CA.na)), 'tot'], ['Paid drinks', fmtK(alcN), 'tot'], ['Paid-beverage gross', money(alcN * CA.alcPrice), 'tot'],
   ].map(([a, b, c]) => `<tr class="${c}"><td>${a}</td><td class="n">${b}</td></tr>`).join('') + `<tr><td colspan="2" class="note" style="border:0">Attendance: "upward of 200,000" ${src('sbj')}. Weather ${src('nws')}. The 2026 caterer was Delaware North's Patina Group ${src('dnp')}. Frisco's caterer has not been confirmed.</td></tr>`;
-  const bctx = $('#chBev').getContext('2d');
-  const mix = [['Michelob Ultra', 36, C.pink], ['High Noon', 18, C.orange], ["Tito's", 15, C.cyan], ['William Hill', 10, C.purple], ['Elijah Craig', 8, C.green], ['Goslings', 7, C.amber], ['Sugarlands', 6, '#c084fc']];
-  charts.bev = new Chart(bctx, { type: 'doughnut', data: { labels: mix.map(m => m[0]), datasets: [{ data: mix.map(m => m[1]), backgroundColor: mix.map(m => m[2]), borderColor: '#141236', borderWidth: 3 }] }, options: { cutout: '62%', plugins: { legend: { position: 'right' }, tooltip: { callbacks: { label: c => c.label + ': ' + c.raw + '% (modeled)' } } } } });
+  $('#bevList').innerHTML = sponsors.filter(x => x.cat === 'Beverage').map(x => `<li><span>${esc(x.n)}<small>${esc(x.tier)} · ${src(x.s)}</small></span></li>`).join('') + `<li><span>Caterer<small>2026: Delaware North's Patina Group ${src('dnp')}</small></span><b><span class="pill tba">Frisco TBA</span></b></li>`;
 }
 const stands = ['18th green pavilion', 'PGA District', 'Main entrance', '17 green', '8 green deck', '1st tee', 'The PGA Shops'];
 function concLive() {
   const load = st.mode === 'sim' ? onGrounds(st.simMin) / (att[SAT] * .86) : .9;
   $('#waits').innerHTML = stands.map((n, i) => { const w = Math.max(.5, load * (3 + (i % 3) * 1.6) * jitter(.18)); return `<div class="b ${w > 6 ? 'hot' : ''}"><span>${n}</span><div><i style="width:${Math.min(100, w / 10 * 100)}%"></i></div><b>${w.toFixed(1)}m</b></div>`; }).join('');
   const day = st.mode === 'sim' ? arrivedFrac(st.simMin) * Math.min(1, prog() * 1.3) : 1, a = att[SAT];
-  $('#concLive').innerHTML = [['Food served', fmtK(a * CA.food * day)], ['NA drinks', fmtK(a * CA.na * day)], ['Paid drinks', fmtK(a * CA.alcShare * CA.alcPer * day)], ['Paid gross', money(a * CA.alcShare * CA.alcPer * CA.alcPrice * day)]].map(([l, v]) => `<div><span>${l}</span><b>${v}</b></div>`).join('') + `<p class="note" style="grid-column:1/-1;margin:0">${st.mode === 'sim' ? 'Saturday so far · simulated.' : 'Modeled full Saturday.'}</p>`;
+  $('#concLive').innerHTML = [['Food served', fmtK(a * CA.food * day)], ['NA drinks', fmtK(a * CA.na * day)], ['Paid drinks', fmtK(a * CA.alcShare * CA.alcPer * day)], ['Paid gross', money(a * CA.alcShare * CA.alcPer * CA.alcPrice * day)]].map(([l, v]) => `<div><span>${l}</span><b>${v}</b></div>`).join('') + `<p class="note" style="grid-column:1/-1;margin:0">${st.mode === 'sim' ? 'Saturday so far · simulated.' : 'Simulated full Saturday.'}</p>`;
 }
 
 /* ---------- itineraries ---------- */
@@ -282,10 +291,11 @@ function promosRender() {
   $('#promoGrid').innerHTML = promos.map(p => {
     let val, lab;
     if (p.k === 'closed') { val = p.base ? fmt(p.base) + '+' : 'Closed'; lab = p.base ? p.unit + ' · real' : 'window closed'; }
-    else if (!p.base) { val = st.mode === 'sim' ? fmt((p.unit === 'birdies' ? 612 : 140) * f) : '—'; lab = st.mode === 'sim' ? p.unit + ' · simulated' : 'tracked during the week'; }
-    else { val = fmtK(p.base * f * (st.mode === 'sim' ? 1 : 1)); lab = p.unit + (st.mode === 'sim' ? ' · simulated WTD' : ' · modeled week'); }
+    else if (st.mode !== 'sim') { val = '—'; lab = 'measured during championship week'; }
+    else if (!p.base) { val = fmt((p.unit === 'birdies' ? 612 : 140) * f); lab = p.unit + ' · simulated'; }
+    else { val = fmtK(p.base * f); lab = p.unit + ' · simulated week to date'; }
     const pill = p.k === 'closed' ? '<span class="pill tba">Closed</span>' : p.k === 'tba' ? '<span class="pill ltd">Frisco TBA</span>' : '<span class="pill open">Active</span>';
-    return `<div class="promo"><div class="ph"><span class="who">${esc(p.who)}</span>${pill}</div><h4>${esc(p.n)}</h4><p>${esc(p.d)}</p><div class="pf"><div><b>${val}</b><small>${lab}</small></div><div style="text-align:right"><small>${esc(p.when)}</small>${src(p.s)}</div></div></div>`;
+    return `<div class="promo${st.mode === 'sim' && p.k !== 'closed' ? ' is-sim' : ''}"><div class="ph"><span class="who">${esc(p.who)}</span>${pill}</div><h4>${esc(p.n)}</h4><p>${esc(p.d)}</p><div class="pf"><div><b>${val}</b><small>${lab}</small></div><div style="text-align:right"><small>${esc(p.when)}</small>${src(p.s)}</div></div></div>`;
   }).join('');
 }
 
@@ -294,19 +304,19 @@ function tournament() {
   $('#tFacts').innerHTML = [
     ['Championship', '109th PGA Championship', 'sbj'], ['Rounds', 'May 20–23, 2027 (week May 17–23)', 'sched'], ['Field', '156 players', 'field'],
     ['Defending champion', 'Aaron Rai, −9 at Aronimink', 'rai'], ['2026 purse', '$20.5M · $3.69M winner (2027 TBA)', 'notes'],
-    ['Course', 'Fields Ranch East · Gil Hanse · front and back nines swapped for 2027', 'golfweek'], ['History', 'First Texas major since 1969; first in DFW since 1963', 'sbj'],
+    ['Course', 'Fields Ranch East · Gil Hanse · nines swapped for 2027', 'swap'], ['History', 'First Texas major since 1969; first in DFW since 1963', 'sbj'],
   ].map(([a, b, s]) => `<li><span>${a}<small>${src(s)}</small></span><b>${b}</b></li>`).join('');
   const ctx = $('#chOdds').getContext('2d');
   charts.odds = new Chart(ctx, { type: 'bar', data: { labels: odds.map(o => o[0] + '  ' + o[1]), datasets: [{ data: odds.map(o => o[2]), backgroundColor: grad(ctx, C.purple, C.pink), borderRadius: 5 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.raw + '% implied' } } }, scales: { x: { ticks: { callback: v => v + '%' } }, y: { grid: { display: false } } } } });
   $('#lb26').innerHTML = `<tr><th>Pos</th><th>Player</th><th>Rounds</th><th style="text-align:right">Total</th></tr>` + lb26.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td style="font-family:var(--mono);font-size:12px">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('');
+  const H = window.PGA.course.holes, pc = { 3: C.cyan, 4: C.purple, 5: C.pink };
   const hctx = $('#chHoles').getContext('2d');
-  charts.holes = new Chart(hctx, { data: { labels: Array.from({ length: 18 }, (_, i) => i + 1), datasets: [
-    { type: 'bar', label: 'Gallery density (fans at hole)', data: holesData(), backgroundColor: Array.from({ length: 18 }, (_, i) => [9, 17, 18].includes(i + 1) ? 'rgba(232,76,154,.8)' : 'rgba(79,209,232,.55)'), borderRadius: 4, yAxisID: 'y' },
-    { type: 'line', label: 'Scoring vs par (avg)', data: holeScore(), borderColor: C.amber, pointRadius: 3, pointBackgroundColor: C.amber, tension: .3, yAxisID: 'y1' }] },
-    options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => fmtK(v) } }, y1: { position: 'right', min: -.4, max: .6, grid: { display: false }, ticks: { callback: v => (v > 0 ? '+' : '') + v.toFixed(1) } }, x: { grid: { display: false } } } } });
+  charts.holes = new Chart(hctx, { type: 'bar', data: { labels: H.map(h => h.n), datasets: [{ label: 'Yards', data: H.map(h => h.yds), backgroundColor: H.map(h => pc[h.par] + 'cc'), borderRadius: 4 }] },
+    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { title: c => 'Hole ' + H[c[0].dataIndex].n + ' · par ' + H[c[0].dataIndex].par, label: c => c.raw + ' yards · daily-play No. ' + H[c.dataIndex].daily } } }, scales: { y: { min: 0, ticks: { callback: v => v + ' yd' } }, x: { grid: { display: false }, title: { display: true, text: 'Hole (2027 order) · cyan par 3 · purple par 4 · pink par 5', color: '#7a76a0' } } } } });
+  const sctx = $('#chHolesSim').getContext('2d');
+  charts.holesSim = new Chart(sctx, { type: 'bar', data: { labels: H.map(h => h.n), datasets: [{ label: 'Fans at hole (simulated)', data: holesData(), backgroundColor: H.map(h => [9, 17, 18].includes(h.n) ? 'rgba(245,184,61,.85)' : 'rgba(245,184,61,.45)'), borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => fmtK(v) } }, x: { grid: { display: false } } } } });
 }
 function holesData() { const og = st.mode === 'sim' ? onGrounds(st.simMin) : att[SAT] * .7; seed = 55; return Array.from({ length: 18 }, (_, i) => og * (.03 + rnd() * .03 + ([9, 17, 18].includes(i + 1) ? .05 : 0) + (i === 0 ? .02 : 0)) * (st.mode === 'sim' ? jitter(.05) : 1)); }
-function holeScore() { seed = 77; return Array.from({ length: 18 }, () => +(rnd() * .7 - .25).toFixed(2)); }
 
 /* ---------- Frisco ---------- */
 function frisco() {
@@ -331,7 +341,7 @@ function frisco() {
 function mob() {
   const q = st.mode === 'sim' ? Math.round(onGrounds(st.simMin) / 900 * jitter(.1)) : null;
   $('#mob').innerHTML = [['DFW & Love Field', '~25 minutes', 'vfp'], ['Parking', 'Toyota Stadium lots + shuttles · plan TBA', 'dmn'], ['Rideshare', 'In talks with Uber and Lyft', 'dmn']].map(([a, b, s]) => `<li><span>${a}<small>${src(s)}</small></span><b>${b}</b></li>`).join('') +
-    `<li><span>Rideshare queue now<small class="t-sim">simulated</small></span><b>${q === null ? '<span class="pill tba">Week only</span>' : q + ' min'}</b></li><li><span>Shuttle loop<small class="t-sim">simulated</small></span><b>${q === null ? '<span class="pill tba">Week only</span>' : Math.round(9 + q / 4) + ' min'}</b></li>`;
+    (q === null ? '' : `<li class="simrow"><span>Rideshare queue now<small class="t-sim">Simulated · not real data</small></span><b>${q} min</b></li><li class="simrow"><span>Shuttle loop<small class="t-sim">Simulated · not real data</small></span><b>${Math.round(9 + q / 4)} min</b></li>`);
 }
 function corr() { $('#corr').innerHTML = [['May 2027', 'CJ Cup Byron Nelson (McKinney) → PGA Championship → Charles Schwab Challenge (Colonial)', 'dmnSched'], ['Footprint', 'Three tournaments in five weeks; Colonial about 50 miles southwest, the week after', 'dmnSched'], ['Return', 'PGA Championship back at Frisco in 2034', 'fos']].map(([a, b, s]) => `<li><span>${a}<small>${src(s)}</small></span><b style="max-width:62%">${b}</b></li>`).join(''); }
 
@@ -355,10 +365,10 @@ function proof() {
 function refreshLive() {
   kpis(); tickClock(); spGrid(); spCharts(); gateUpd(); occUpd(); concLive(); stopsUpd(); promosRender(); mob();
   charts.sentLine.data.datasets[0].data = sentData(); charts.sentLine.update('none');
-  charts.holes.data.datasets[0].data = holesData(); charts.holes.update('none');
+  charts.holesSim.data.datasets[0].data = holesData(); charts.holesSim.update('none');
 }
 function setMode(m) {
-  st.mode = m;
+  st.mode = m; document.body.classList.toggle('m-sim', m === 'sim'); document.body.classList.toggle('m-real', m !== 'sim');
   $$('.mode button').forEach(b => { const on = b.dataset.mode === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   if (m === 'sim') { st.simMin = 11 * 60; st.checkins = Math.round(att[SAT] * arrivedFrac(st.simMin) * .62); }
   heroLede(); ticker(); refreshLive(); spDetail();
@@ -370,6 +380,13 @@ const secs = $$('main section[id]');
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) $$('.jump a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
 secs.forEach(s => io.observe(s));
 
+// simulated-panel placeholders and banners
+$$('.card[data-sim]').forEach(c => {
+  const h = c.querySelector('.card-h');
+  h.insertAdjacentHTML('afterend', `<div class="simban">Simulated · generated in your browser · not real data</div><div class="simph"><p>No real data yet. This panel will show ${c.dataset.what} once championship week starts.</p><button class="btn-sim" data-go-sim>See the simulated preview</button></div>`);
+});
+$$('[data-go-sim]').forEach(b => b.onclick = () => { setMode('sim'); });
+document.body.classList.add('m-real');
 // init
 heroLede(); kpis(); ticker(); tickClock(); spFilters(); spGrid(); spDetail(); spCharts();
 tickets(); gateUpd(); hospitality(); occUpd(); concessions(); concLive(); itineraries(); stopsUpd();

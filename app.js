@@ -67,14 +67,14 @@ function planFor(id) {
     add('09:30', `Walk out to the ${prefs.fav}th green`, C.holes[prefs.fav - 1].note || `Par ${C.holes[prefs.fav - 1].par}, ${C.holes[prefs.fav - 1].yds} yards.`, { hole: prefs.fav, mine: true });
     add('12:00', 'Lunch on your Championship+ ticket', 'Championship+ includes 1 entrée, 1 snack and 1 non-alcoholic drink per concession visit, with unlimited visits.');
     add('13:30', 'The PGA Shops presented by Chase', 'Merchandise early in the week, before the championship-round crowds. Location on the official map (TBA).', { qr: 'shops' });
-    add('15:00', 'Photos at the 8th green', 'The par 3 over wetlands to a bluff green — the signature photo spot. Cameras OK Mon–Wed.', { poi: 'deck8' });
+    add('15:00', 'Photos at the 17th green', 'The par 3 over wetlands to a bluff-top green — the signature photo spot. Cameras OK Mon–Wed.', { poi: 'g17' });
   } else {
     if (T.hosp) add('07:30', `Check in at ${poiById(T.hosp).name}`, esc(poiById(T.hosp).desc), { poi: T.hosp, qr: T.hosp, mine: true });
-    add('08:00', 'Morning wave off the 1st tee', 'Opening par 5 (633 yards). Tee times are published by the PGA of America the day before each round.', { poi: 't1' });
+    add('08:00', 'Morning wave off the 1st tee', 'Opening par 4 (484 yards), an elevated tee shot over Panther Creek. Tee times are published by the PGA of America the day before each round.', { poi: 't1' });
     add('10:30', `Camp at the ${prefs.fav}th green`, (C.holes[prefs.fav - 1].note || `Par ${C.holes[prefs.fav - 1].par}, ${C.holes[prefs.fav - 1].yds} yards.`) + ' EventPulse alerts you when your featured group is two holes away.', { hole: prefs.fav, mine: true });
     add('12:30', T.hosp ? `Lunch back at ${poiById(T.hosp).name}` : 'Lunch on your Championship+ ticket', T.hosp ? 'Hospitality food and drink as included with your ticket.' : 'Entrée, snack and non-alcoholic drink per concession visit, unlimited visits.', T.hosp ? { poi: T.hosp } : {});
-    add('14:30', 'The short 17th', '141-yard par 3, the shortest hole on the card.', { poi: 'g17', qr: 'g17' });
-    add(id === 'sun' ? '16:30' : '16:00', id === 'sun' ? 'Final groups at the 18th green' : 'Late wave finishes at 18', '576-yard par-5 finishing hole.' + (id === 'sun' ? ' Trophy ceremony follows the final putt.' : ''), { poi: 'g18', qr: 'g18', mine: id === 'sun' });
+    add('14:30', 'The bluff-top 17th', '179-yard par 3 over a wetland, where the closing stretch turns.', { poi: 'g17', qr: 'g17' });
+    add(id === 'sun' ? '16:30' : '16:00', id === 'sun' ? 'Final groups at the 18th green' : 'Late wave finishes at 18', '477-yard par-4 finishing hole beside the PGA District.' + (id === 'sun' ? ' Trophy ceremony follows the final putt.' : ''), { poi: 'g18', qr: 'g18', mine: id === 'sun' });
   }
   if (prefs.mobility) add('11:00', 'Rest stop', 'Accessibility plan: shaded seating and the shortest walking route between your spots. Official ADA details are TBA.', {});
   const e = P.frisco.find(f => f.id === prefs.eve) || P.frisco[3];
@@ -236,7 +236,7 @@ function vCourse() {
       <div class="tblwrap"><table class="score"><tr><th>Hole</th>${C.holes.slice(0, 9).map(h => `<th>${h.n}</th>`).join('')}<th>Out</th></tr><tr><td class="dim">Par</td>${C.holes.slice(0, 9).map(h => `<td>${h.par}</td>`).join('')}<td>36</td></tr><tr><td class="dim">Yds</td>${C.holes.slice(0, 9).map(h => `<td>${h.yds}</td>`).join('')}<td>3,970</td></tr></table>
       <table class="score" style="margin-top:6px"><tr><th>Hole</th>${C.holes.slice(9).map(h => `<th>${h.n}</th>`).join('')}<th>In</th></tr><tr><td class="dim">Par</td>${C.holes.slice(9).map(h => `<td>${h.par}</td>`).join('')}<td>36</td></tr><tr><td class="dim">Yds</td>${C.holes.slice(9).map(h => `<td>${h.yds}</td>`).join('')}<td>3,893</td></tr></table></div>
       <div id="list"></div>
-      <p class="src">Hole routing and course boundary: ${ext(S.osm, 'OpenStreetMap')}. Yardages: ${ext(S.card, 'championship tees')} (championship-week setup may differ). Hospitality pins are placed from official venue descriptions and are approximate. The entrance, parking and shuttle locations aren’t published yet, so they’re not on the map.</p>
+      <p class="src">2027 championship routing: the front and back nines are swapped from daily play (${ext(S.swap, 'Dallas Morning News')}, ${ext(S.gca, 'Golf Club Atlas')}), so hole numbers here follow the championship order. Hole geometry and course boundary: ${ext(S.osm, 'OpenStreetMap')}. Yardages: ${ext(S.card, 'championship tees')} (championship-week setup may differ). Hospitality pins are placed from official venue descriptions and are approximate. The entrance, parking and shuttle locations aren’t published yet, so they’re not on the map.</p>
     </div>
     <div class="map-wrap"><div class="map-ctrl" id="cats">${Object.entries(CATS).map(([k, [l, c]]) => `<button class="chip on" data-c="${k}"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:6px"></span>${l}</button>`).join('')}<button class="chip" id="me"><i data-lucide="locate" style="width:14px;height:14px"></i> Use my location</button></div><div id="mapEl"></div></div>
   </div>`;
@@ -272,7 +272,7 @@ function vCourse() {
   const routeTo = (p, quiet, z) => { if (mapObj && mapObj.getSource('route')) { mapObj.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[you.lng, you.lat], [p.lng, p.lat]] } }); if (!quiet) mapObj.flyTo({ center: [p.lng, p.lat], zoom: z || 16.5, speed: .9 }); } };
   function pickH(n, quiet) {
     selH = n; selP = null; const h = C.holes[n - 1], g = holeGreen(n), m = dist(you, g);
-    $('#det').innerHTML = `<span class="tag ok">Hole ${n}</span> <span class="tag">Par ${h.par} · ${h.yds} yds</span><h3 style="margin-top:8px">The ${n}${['st', 'nd', 'rd'][n - 1] || 'th'} green</h3><p class="mute" style="margin:0;font-size:14px">${esc(h.note || 'Fields Ranch East, championship tees.')}</p>
+    $('#det').innerHTML = `<span class="tag ok">Hole ${n}</span> <span class="tag">Par ${h.par} · ${h.yds} yds</span>${h.daily ? ` <span class="tag">Daily-play No. ${h.daily}</span>` : ''}<h3 style="margin-top:8px">The ${n}${['st', 'nd', 'rd'][n - 1] || 'th'} green</h3><p class="mute" style="margin:0;font-size:14px">${esc(h.note || 'Fields Ranch East, championship tees.')}</p>
       <p style="margin:8px 0 0;font-size:13px"><b>${fmtDist(m)}</b> from ${esc(you.label)} · about ${Math.max(1, Math.round(m * 1.35 / 75))} min walk</p>
       <div class="acts"><a class="btn sm" target="_blank" rel="noopener" href="${gmaps(g.lat, g.lng)}"><i data-lucide="navigation"></i>Go in Google Maps</a><button class="btn sm ghost" id="favH"><i data-lucide="star"></i>${prefs.fav === n ? 'Your favorite hole' : 'Make my hole'}</button></div>`;
     $('#favH').onclick = () => { prefs.fav = n; savePrefs(); pickH(n, true); toast(`Hole ${n} added to your itinerary`); };
@@ -468,7 +468,7 @@ const KB = [
   [/ticket|resale|price|seatgeek|sold/i, () => `Practice rounds (Mon–Wed) are on sale. Thursday–Sunday are sold out, with verified resale on SeatGeek, the official ticketing provider. Tickets are digital only in the PGA Championships App or SeatGeek, visible from mid-April. ${ext(S.tix, 'Ticket options')}`, []],
   [/food|eat|drink|lunch|concession|beer/i, () => `Championship+ tickets include 1 entrée, 1 snack and 1 non-alcoholic drink per concession visit, with unlimited visits. Hospitality tickets include their own food and drink.`, []],
   [/hospitality|wanamaker|choctaw|icehouse|deck|8 green/i, () => `Three ways to upgrade Thu–Sun: Championship+ With 8 Green Viewing (shaded deck, beer and wine), the Wanamaker Club (11th green) and Choctaw Icehouse (all-inclusive, 9th green, in the PGA District).`, ['deck8', 'wanamaker', 'choctaw']],
-  [/hole|course|yard|par|signature|8th|17|18/i, () => `Fields Ranch East is a Gil Hanse design, par 72 at 7,863 yards. Don’t miss the 8th — a par 3 over wetlands to a bluff green — and the 141-yard 17th. The 576-yard par-5 18th closes it out.`, ['deck8', 'g17', 'g18']],
+  [/hole|course|yard|par|signature|8th|17|18/i, () => `Fields Ranch East is a Gil Hanse design, par 72 at 7,863 yards. For 2027 the front and back nines are swapped from daily play. Don’t miss the 17th — a par 3 over wetlands to a bluff-top green — and the 141-yard 8th. The par-4 18th finishes beside the PGA District.`, ['deck8', 'g17', 'g18']],
   [/hotel|stay|omni|resort/i, () => `The Omni PGA Frisco Resort is on campus (500 rooms) — you can walk to the course. Elsewhere, I’ll plan drive times from your hotel.`, ['omni']],
   [/airport|fly|dfw|love field/i, () => `DFW International is about ${driveMin(dist(COURSE_C, P.frisco[0]))} min and Dallas Love Field about ${driveMin(dist(COURSE_C, P.frisco[1]))} min by car (estimates; traffic varies).`, []],
   [/dinner|evening|night|restaurant|frisco|star|topgolf/i, () => `Good evening picks: Frisco Square downtown, The Star in Frisco, or Topgolf The Colony. On campus, the PGA District has dining plus The Swing and The Dance Floor. <a href="#frisco">Open Around Frisco</a>.`, ['district']],

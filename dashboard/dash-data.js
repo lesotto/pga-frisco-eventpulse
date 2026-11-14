@@ -32,6 +32,8 @@ window.D = (() => {
     boyd: ["Boyd's Bets", 'https://www.boydsbets.com/pga-championship-odds/'],
     rai: ['PGA TOUR · AP', 'https://www.pgatour.com/article/news/daily-wrapup/2026/05/17/round-4-2026-pga-championship-aronimink-leaderboard-results-scores-final'],
     notes: ['PGA TOUR final-round notes', 'https://pgatourmedia.pgatourhq.com/static-assets/page/files/tours/2026/pgatour/pgachampionship/roundInfo/R4_Notes.pdf'],
+    swap: ['Dallas Morning News · routing', 'https://www.dallasnews.com/sports/golf/2025/06/22/minjee-lee-conquers-friscos-fields-ranch-east-at-womens-pga-championship-for-third-major/'],
+    gca: ['Golf Club Atlas', 'https://golfclubatlas.com/countries/pga-frisco-fields-ranch-east-2025/'],
     golfweek: ['Golfweek', 'https://golfweek.usatoday.com/story/sports/golf/lpga/2025/06/20/stacy-lewis-blames-six-hour-rounds-kpmg-womens-pga-poor-setup/84294179007/'],
     city: ['City of Frisco · Demographics', 'https://www.friscotexas.gov/1454/Demographics'],
     glance: ['Frisco at a Glance 2026', 'https://www.friscotexas.gov/DocumentCenter/View/4900/2026_At-A-Glance-PDF'],
