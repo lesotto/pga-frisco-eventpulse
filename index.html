@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EventPulse — 2027 PGA Championship · PGA Frisco</title>
+<meta name="description" content="EventPulse for the 2027 PGA Championship at Fields Ranch East, PGA Frisco (May 17–23, 2027): personal week itinerary, course map, QR check-in, Frisco local context and a real-time fan signal console. A FuzeBox demo.">
+<meta name="author" content="FuzeBox">
+<meta property="og:title" content="EventPulse — 2027 PGA Championship, Frisco">
+<meta property="og:description" content="Hyper-personalized championship week: itinerary, course map, QR check-in and two-way fan communication.">
+<meta property="og:image" content="img/hero.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2308111f'/><path d='M12 6v20' stroke='%23c9a43a' stroke-width='2.5'/><path d='M12 7l10 4-10 4z' fill='%23c9a43a'/><ellipse cx='16' cy='26' rx='8' ry='2' fill='%233e9b5f'/></svg>">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#home" aria-label="EventPulse home">
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#112038" stroke="#c9a43a"/><path d="M12 6v20" stroke="#c9a43a" stroke-width="2.5"/><path d="M12 7l10 4-10 4z" fill="#c9a43a"/><ellipse cx="16" cy="26" rx="8" ry="2" fill="#3e9b5f"/></svg>
+    <span><b>EventPulse</b><small>PGA Championship 2027</small></span>
+  </a>
+  <nav class="tabs" id="tabs" aria-label="Sections">
+    <a href="#home" data-v="home"><i data-lucide="house"></i><span>Home</span></a>
+    <a href="#week" data-v="week"><i data-lucide="calendar-range"></i><span>My Week</span></a>
+    <a href="#course" data-v="course"><i data-lucide="flag"></i><span>Course Map</span></a>
+    <a href="#frisco" data-v="frisco"><i data-lucide="map"></i><span>Around Frisco</span></a>
+    <a href="#checkin" data-v="checkin"><i data-lucide="qr-code"></i><span>Check-In</span></a>
+    <a href="#console" data-v="console"><i data-lucide="activity"></i><span>Console</span></a>
+  </nav>
+  <button class="pill-btn" id="openConcierge"><i data-lucide="sparkles"></i><span>Ask Walter</span></button>
+</header>
+<main id="view"></main>
+<aside class="concierge" id="concierge" hidden aria-label="Walter, championship concierge">
+  <div class="c-head">
+    <div><b>Walter</b><small>Championship concierge · built-in answers</small></div>
+    <button class="icon-btn" id="closeConcierge" aria-label="Close"><i data-lucide="x"></i></button>
+  </div>
+  <div class="c-log" id="cLog"></div>
+  <div class="c-chips" id="cChips"></div>
+  <form class="c-form" id="cForm"><input id="cInput" placeholder="Ask about tickets, bags, parking, holes…" autocomplete="off"><button aria-label="Send"><i data-lucide="send"></i></button></form>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<footer class="foot">
+  <p><b>A FuzeBox EventPulse demonstration.</b> Not affiliated with or endorsed by the PGA of America, the PGA Championship, PGA Frisco or Omni Hotels. Dates, ticket products and policies are compiled from official championship pages (linked in each section). The official parking and transportation plan, gate times and entrance location have not been published and are shown as TBA. Itinerary times are estimates. Hospitality pins are approximate. Console data, outreach, gifts and the featured-group round are simulated samples — no real players or scores. Images are AI concept imagery. Imagery © Esri; course data © OpenStreetMap contributors.</p>
+</footer>
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
