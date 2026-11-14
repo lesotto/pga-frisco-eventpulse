@@ -288,3 +288,6 @@ h1 em,h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:tex
 .hero video,.hero img{opacity:.9!important;filter:saturate(1.25) contrast(1.05)}
 .hero::after{background:linear-gradient(180deg,rgba(11,15,36,0) 0%,rgba(11,15,36,.25) 55%,var(--bg) 100%),linear-gradient(90deg,rgba(11,15,36,.82) 0%,rgba(40,16,70,.35) 55%,rgba(232,76,154,.08) 100%)!important}
 @media(max-width:700px){.tour-hud{left:12px;right:56px;transform:none;bottom:44px}.tour-hud span{display:none}}
+
+.mk-lbl{pointer-events:none;font:700 12px/1 var(--f-b);color:#fff;background:rgba(11,15,36,.78);border:1px solid rgba(232,76,154,.55);padding:4px 8px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.mk-lbl.pga{background:linear-gradient(90deg,#E84C9A,#F07A2A);border-color:transparent}

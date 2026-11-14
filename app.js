@@ -219,6 +219,7 @@ function downloadICS(ids) {
 
 /* ---------- COURSE MAP ---------- */
 function satStyle() { return { version: 8, sources: { sat: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri · Course data © OpenStreetMap contributors' } }, layers: [{ id: 'sat', type: 'raster', source: 'sat' }] }; }
+function hybridStyle() { return { version: 8, sources: { sat: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Imagery © Esri, Maxar · © OpenStreetMap contributors' }, roads: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19 }, lbl: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19 } }, layers: [{ id: 'sat', type: 'raster', source: 'sat', paint: { 'raster-saturation': .15, 'raster-contrast': .08 } }] }; }
 function darkStyle() { return { version: 8, sources: { d: { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 16, attribution: 'Basemap © Esri, HERE, Garmin, © OpenStreetMap contributors' } }, layers: [{ id: 'd', type: 'raster', source: 'd' }] }; }
 const qrSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>';
 function vCourse() {
@@ -375,13 +376,53 @@ function vFrisco() {
     </div>
     <div class="map-wrap"><div id="mapEl"></div><div class="tour-hud" id="tHud" style="display:none"><i class="dot"></i><b id="tTi">Course tour</b><span id="tTx"></span><button id="tBtn">Stop</button><i class="tour-bar" id="tBar" style="width:0"></i></div></div>
   </div>`;
-  mapObj = new maplibregl.Map({ container: 'mapEl', style: darkStyle(), center: [-96.9, 33.05], zoom: innerWidth < 700 ? 9 : 10, attributionControl: { compact: true } });
+  const mob = innerWidth < 700;
+  mapObj = new maplibregl.Map({ container: 'mapEl', style: hybridStyle(), center: [-96.9, 33.05], zoom: mob ? 9 : 10, attributionControl: { compact: true } });
   mapObj.addControl(new maplibregl.NavigationControl(), 'bottom-right');
   const pga = document.createElement('div'); pga.className = 'mk qr'; pga.innerHTML = qrSvg; pga.title = 'PGA Frisco';
+  { const lb = document.createElement('div'); lb.className = 'mk-lbl pga'; lb.textContent = 'PGA Frisco'; new maplibregl.Marker({ element: lb, anchor: 'left', offset: [16, 0] }).setLngLat([COURSE_C.lng, COURSE_C.lat]).addTo(mapObj); }
   new maplibregl.Marker({ element: pga }).setLngLat([COURSE_C.lng, COURSE_C.lat]).setPopup(new maplibregl.Popup({ offset: 14 }).setHTML('<b>PGA Frisco</b><br>Fields Ranch East')).addTo(mapObj);
   const mks = {};
-  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#4FD1E8' : '#22C08A'; mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#ff9fcf">Google Maps</a>`)).addTo(mapObj); });
-  $$('#fl .wp').forEach(b => b.onclick = () => { const f = list.find(x => x.id === b.dataset.id); $$('#fl .wp').forEach(x => x.classList.toggle('sel', x === b)); mapObj.flyTo({ center: [f.lng, f.lat], zoom: 12 }); mks[f.id].togglePopup(); if (f.kind !== 'Airport') { prefs.eve = f.id; savePrefs(); toast(`${f.name} set as your evening plan`); } });
+  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#4FD1E8' : '#22C08A'; const lb = document.createElement('div'); lb.className = 'mk-lbl'; lb.textContent = f.name; new maplibregl.Marker({ element: lb, anchor: 'left', offset: [12, 0] }).setLngLat([f.lng, f.lat]).addTo(mapObj); mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#ff9fcf">Google Maps</a>`)).addTo(mapObj); });
+  /* Rutgers-style 3D fly-around of Frisco */
+  let tok = 0, touring = false; const P0 = [COURSE_C.lng, COURSE_C.lat], zA = mob ? -0.8 : 0;
+  const camTo = (o, t) => new Promise(r => { if (t !== tok || !mapObj) return r(false); mapObj.once('moveend', () => r(t === tok)); mapObj.flyTo({ ...o, essential: true }); });
+  const hud = (ti, tx, f) => { $('#tHud').style.display = ''; $('#tTi').textContent = ti; $('#tTx').textContent = tx; $('#tBar').style.width = (f * 100) + '%'; };
+  const brg = (a, b) => Math.atan2((b[0] - a[0]) * Math.cos(a[1] * Math.PI / 180), b[1] - a[1]) * 180 / Math.PI;
+  const setRoute = (to, f) => { const s = mapObj && mapObj.getSource('fr'); if (!s) return; const e = to ? [P0[0] + (to[0] - P0[0]) * f, P0[1] + (to[1] - P0[1]) * f] : P0; s.setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [P0, e] } }); };
+  const grow = (to, ms, t) => new Promise(r => { const t0 = performance.now(); const st = () => { if (t !== tok || !mapObj) return r(false); const f = Math.min(1, (performance.now() - t0) / ms); setRoute(to, f); f < 1 ? requestAnimationFrame(st) : r(true); }; st(); });
+  const closePops = () => Object.values(mks).forEach(m => m.getPopup() && m.getPopup().isOpen() && m.togglePopup());
+  function stopTour() { if (!touring) return; touring = false; tok++; $('#tBtn').textContent = 'Replay tour'; $('#tTi').textContent = 'Tour paused'; $('#tTx').textContent = 'Pan, zoom or tap a place to explore'; }
+  async function startTour() {
+    if (!mapObj) return; const t = ++tok; touring = true; $('#tBtn').textContent = 'Stop'; closePops(); setRoute(null, 0);
+    hud('PGA Frisco', 'Fields Ranch East · start of the Frisco tour', 0);
+    if (!await camTo({ center: P0, zoom: 14.8 + zA, pitch: 60, bearing: -20, duration: 3600, curve: 1.6 }, t)) return;
+    if (!await camTo({ center: P0, zoom: 15 + zA, pitch: 62, bearing: 70, duration: 4200, easing: x => x }, t)) return;
+    for (const [i, f] of list.entries()) {
+      if (t !== tok) return; const to = [f.lng, f.lat], b = brg(P0, to), far = f.m > 15000;
+      $$('#fl .wp').forEach(x => x.classList.toggle('sel', x.dataset.id === f.id)); closePops();
+      hud(f.name, `${f.kind} · ${fmtDist(f.m)} · ~${driveMin(f.m)} min drive`, (i + 1) / list.length);
+      if (!await camTo({ center: [(P0[0] + to[0]) / 2, (P0[1] + to[1]) / 2], zoom: (far ? 10.3 : 11.6) + zA, pitch: 50, bearing: b, duration: 2600 }, t)) return;
+      if (!await grow(to, 1300, t)) return;
+      if (!await camTo({ center: to, zoom: (f.kind === 'Airport' ? 12.8 : 14.6) + zA, pitch: 58, bearing: b + 25, duration: 2600, curve: 1.4 }, t)) return;
+      if (t === tok && mks[f.id]) mks[f.id].togglePopup();
+      if (!await camTo({ center: to, zoom: (f.kind === 'Airport' ? 13 : 14.8) + zA, pitch: 60, bearing: b + 70, duration: 3200, easing: x => x }, t)) return;
+    }
+    closePops(); setRoute(null, 0); $$('#fl .wp').forEach(x => x.classList.remove('sel'));
+    hud('Back to PGA Frisco', 'Every stop is one tap from Google Maps directions', 1);
+    if (!await camTo({ center: [-96.88, 33.03], zoom: 9.6 + zA, pitch: 45, bearing: 0, duration: 4200 }, t)) return;
+    touring = false; $('#tBtn').textContent = 'Replay tour'; $('#tTi').textContent = 'Tour complete';
+  }
+  mapObj.on('load', () => {
+    mapObj.addSource('fr', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    mapObj.addLayer({ id: 'fr-glow', type: 'line', source: 'fr', paint: { 'line-color': '#E84C9A', 'line-width': 10, 'line-opacity': .35, 'line-blur': 6 } });
+    mapObj.addLayer({ id: 'fr', type: 'line', source: 'fr', paint: { 'line-color': '#F5B83D', 'line-width': 3.5 } });
+    $('#tBtn').onclick = () => touring ? stopTour() : startTour();
+    ['mousedown', 'touchstart', 'wheel'].forEach(ev => mapObj.on(ev, () => stopTour()));
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) setTimeout(startTour, 600);
+    else hud('Frisco tour', 'Fly to every stop in 3D', 0);
+  });
+  $$('#fl .wp').forEach(b => b.onclick = () => { stopTour(); const f = list.find(x => x.id === b.dataset.id); $$('#fl .wp').forEach(x => x.classList.toggle('sel', x === b)); mapObj.flyTo({ center: [f.lng, f.lat], zoom: 12 }); mks[f.id].togglePopup(); if (f.kind !== 'Airport') { prefs.eve = f.id; savePrefs(); toast(`${f.name} set as your evening plan`); } });
 }
 
 /* ---------- CHECK-IN ---------- */
