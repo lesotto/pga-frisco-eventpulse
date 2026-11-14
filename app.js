@@ -24,7 +24,7 @@ const poiById = id => P.pois.find(p => p.id === id);
 const COURSE_C = { lat: 33.2069, lng: -96.85 };
 const holeGreen = n => { const l = C.holes[n - 1].line, g = l[l.length - 1]; return { lng: g[0], lat: g[1] }; };
 const holeTee = n => { const g = C.holes[n - 1].line[0]; return { lng: g[0], lat: g[1] }; };
-const CATS = { hosp: ['Hospitality', '#c9a43a'], view: ['Viewing spots', '#3e9b5f'], fan: ['PGA District & campus', '#5aa9e6'], stay: ['Resort', '#b48ce0'] };
+const CATS = { hosp: ['Hospitality', '#F07A2A'], view: ['Viewing spots', '#22C08A'], fan: ['PGA District & campus', '#4FD1E8'], stay: ['Resort', '#B78BFF'] };
 const driveMin = m => Math.max(5, Math.round(m * 1.3 / 1000 / 55 * 60));
 
 /* ---------- ticket products (official names) ---------- */
@@ -103,7 +103,7 @@ function vHome() {
     <span class="ai-badge">AI concept image</span>
     <div class="wrap">
       <span class="eyebrow">EventPulse · 2027 PGA Championship · Frisco, Texas</span>
-      <h1>Every round.<br>Every fan.<br>One plan.</h1>
+      <h1>Every round.<br>Every fan.<br><em>One plan.</em></h1>
       <p class="lede">A personal companion for championship week at Fields Ranch East, PGA Frisco: a day-by-day itinerary built from your ticket, a live course map, QR check-in across the grounds, local Frisco context, and a two-way line between fans and the championship team.</p>
       <div class="row">
         <a class="btn" href="#week"><i data-lucide="calendar-check"></i>Build my week</a>
@@ -239,7 +239,7 @@ function vCourse() {
       <div id="list"></div>
       <p class="src">2027 championship routing: the front and back nines are swapped from daily play (${ext(S.swap, 'Dallas Morning News')}, ${ext(S.gca, 'Golf Club Atlas')}), so hole numbers here follow the championship order. Hole geometry and course boundary: ${ext(S.osm, 'OpenStreetMap')}. Yardages: ${ext(S.card, 'championship tees')} (championship-week setup may differ). Hospitality pins are placed from official venue descriptions and are approximate. The entrance, parking and shuttle locations aren’t published yet, so they’re not on the map.</p>
     </div>
-    <div class="map-wrap"><div class="map-ctrl" id="cats">${Object.entries(CATS).map(([k, [l, c]]) => `<button class="chip on" data-c="${k}"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:6px"></span>${l}</button>`).join('')}<button class="chip" id="me"><i data-lucide="locate" style="width:14px;height:14px"></i> Use my location</button></div><div id="mapEl"></div></div>
+    <div class="map-wrap"><div class="map-ctrl" id="cats">${Object.entries(CATS).map(([k, [l, c]]) => `<button class="chip on" data-c="${k}"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:6px"></span>${l}</button>`).join('')}<button class="chip" id="me"><i data-lucide="locate" style="width:14px;height:14px"></i> Use my location</button></div><div id="mapEl"></div><div class="tour-hud" id="tHud" style="display:none"><i class="dot"></i><b id="tTi">Course tour</b><span id="tTx"></span><button id="tBtn">Stop</button><i class="tour-bar" id="tBar" style="width:0"></i></div></div>
   </div>`;
   mapObj = new maplibregl.Map({ container: 'mapEl', style: satStyle(), bounds: C.poly.reduce((b, p) => b.extend(p), new maplibregl.LngLatBounds(C.poly[0], C.poly[0])), fitBoundsOptions: { padding: mob ? 20 : 50 }, pitch: 0, bearing: 0, attributionControl: { compact: true } });
   mapObj.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'bottom-right');
@@ -249,20 +249,26 @@ function vCourse() {
     el.onclick = e => { e.stopPropagation(); pickP(p.id); };
     markers[p.id] = new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(mapObj);
   });
-  C.holes.forEach(h => { const el = document.createElement('div'); el.className = 'hnum'; el.textContent = h.n; el.onclick = e => { e.stopPropagation(); pickH(h.n); }; new maplibregl.Marker({ element: el }).setLngLat(h.line[0]).addTo(mapObj); });
+  const hEls = {};
+  C.holes.forEach(h => { const el = document.createElement('div'); el.className = 'hnum'; hEls[h.n] = el; el.textContent = h.n; el.onclick = e => { e.stopPropagation(); pickH(h.n); }; new maplibregl.Marker({ element: el }).setLngLat(h.line[0]).addTo(mapObj); });
   const ye = document.createElement('div'); ye.className = 'mk you'; ye.title = 'You';
   markers.you = new maplibregl.Marker({ element: ye }).setLngLat([you.lng, you.lat]).addTo(mapObj);
   const ge = document.createElement('div'); ge.className = 'mk grp'; ge.title = 'Featured group (simulated)'; ge.style.display = 'none';
   const grpMk = new maplibregl.Marker({ element: ge }).setLngLat(C.holes[0].line[0]).addTo(mapObj);
   mapObj.on('load', () => {
     mapObj.addSource('course', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Polygon', coordinates: [C.poly] } } });
-    mapObj.addLayer({ id: 'c-line', type: 'line', source: 'course', paint: { 'line-color': '#c9a43a', 'line-width': 2, 'line-opacity': .7, 'line-dasharray': [2, 1] } });
+    mapObj.addLayer({ id: 'c-line', type: 'line', source: 'course', paint: { 'line-color': '#E84C9A', 'line-width': 2.5, 'line-opacity': .9, 'line-dasharray': [2, 1] } });
     mapObj.addSource('holes', { type: 'geojson', data: { type: 'FeatureCollection', features: C.holes.map(h => ({ type: 'Feature', properties: { n: h.n }, geometry: { type: 'LineString', coordinates: h.line } })) } });
     mapObj.addLayer({ id: 'h-line', type: 'line', source: 'holes', paint: { 'line-color': '#ffffff', 'line-width': 2.5, 'line-opacity': .85 } });
-    mapObj.addLayer({ id: 'h-sel', type: 'line', source: 'holes', filter: ['==', ['get', 'n'], -1], paint: { 'line-color': '#e0bd55', 'line-width': 6 } });
+    mapObj.addLayer({ id: 'h-sel', type: 'line', source: 'holes', filter: ['==', ['get', 'n'], -1], paint: { 'line-color': '#4FD1E8', 'line-width': 7 } });
     mapObj.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    mapObj.addLayer({ id: 'route', type: 'line', source: 'route', paint: { 'line-color': '#5aa9e6', 'line-width': 3, 'line-dasharray': [1, 1.5] } });
+    mapObj.addLayer({ id: 'route', type: 'line', source: 'route', paint: { 'line-color': '#F5B83D', 'line-width': 3, 'line-dasharray': [1, 1.5] } });
     selP ? pickP(selP, true) : pickH(selH, true);
+    $('#tBtn').onclick = () => touring ? stopTour() : startTour();
+    const user = e => { if (e.originalEvent) stopTour(); };
+    ['dragstart', 'zoomstart', 'rotatestart', 'pitchstart'].forEach(ev => mapObj.on(ev, user)); ['mousedown', 'touchstart', 'wheel'].forEach(ev => mapObj.on(ev, () => stopTour()));
+    if (!q.get('h') && !q.get('p') && !matchMedia('(prefers-reduced-motion: reduce)').matches) setTimeout(startTour, 700);
+    else { $('#tHud').style.display = ''; $('#tBtn').textContent = 'Play tour'; $('#tTi').textContent = 'Course tour'; $('#tTx').textContent = 'Fly all 18 holes in 3D'; }
   });
   const drawList = () => {
     $('#list').innerHTML = P.pois.filter(p => on.has(p.cat)).map(p => `<button class="poi ${p.id === selP ? 'sel' : ''}" data-id="${p.id}"><span class="dot" style="background:${CATS[p.cat][1]}"></span><div><b>${esc(p.name)}${p.qr ? ' · QR' : ''}</b><span>${fmtDist(dist(you, p))} from you${p.approx ? ' · approx.' : ''}</span></div></button>`).join('');
@@ -272,8 +278,9 @@ function vCourse() {
   };
   const on = new Set(Object.keys(CATS));
   const routeTo = (p, quiet, z) => { if (mapObj && mapObj.getSource('route')) { mapObj.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[you.lng, you.lat], [p.lng, p.lat]] } }); if (!quiet) mapObj.flyTo({ center: [p.lng, p.lat], zoom: z || 16.5, speed: .9 }); } };
-  function pickH(n, quiet) {
-    selH = n; selP = null; const h = C.holes[n - 1], g = holeGreen(n), m = dist(you, g);
+  function pickH(n, quiet, fromTour) {
+    if (!fromTour) stopTour();
+    selH = n; Object.entries(hEls).forEach(([k, e]) => e.classList.toggle('on', +k === n)); selP = null; const h = C.holes[n - 1], g = holeGreen(n), m = dist(you, g);
     $('#det').innerHTML = `<span class="tag ok">Hole ${n}</span> <span class="tag">Par ${h.par} · ${h.yds} yds</span>${h.daily ? ` <span class="tag">Daily-play No. ${h.daily}</span>` : ''}<h3 style="margin-top:8px">The ${n}${['st', 'nd', 'rd'][n - 1] || 'th'} green</h3><p class="mute" style="margin:0;font-size:14px">${esc(h.note || 'Fields Ranch East, championship tees.')}</p>
       <p style="margin:8px 0 0;font-size:13px"><b>${fmtDist(m)}</b> from ${esc(you.label)} · about ${Math.max(1, Math.round(m * 1.35 / 75))} min walk</p>
       <div class="acts"><a class="btn sm" target="_blank" rel="noopener" href="${gmaps(g.lat, g.lng)}"><i data-lucide="navigation"></i>Go in Google Maps</a><button class="btn sm ghost" id="favH"><i data-lucide="star"></i>${prefs.fav === n ? 'Your favorite hole' : 'Make my hole'}</button></div>`;
@@ -282,6 +289,7 @@ function vCourse() {
     drawList(); icons(); grpStatus();
   }
   function pickP(id, quiet) {
+    stopTour(); Object.values(hEls).forEach(e => e.classList.remove('on'));
     selP = id; selH = null; const p = poiById(id); if (!p) return;
     const m = dist(you, p);
     $('#det').innerHTML = `<span class="tag" style="color:${CATS[p.cat][1]}">${CATS[p.cat][0]}</span>${p.qr ? ' <span class="tag red">QR check-in</span>' : ''}${p.approx ? ' <span class="tag sim">Approx. pin</span>' : ''}
@@ -291,6 +299,34 @@ function vCourse() {
       <p class="src" style="margin-top:8px">Two-way handoff: Google Maps takes you there; the QR on arrival confirms it and advances your itinerary. ${ext(p.src, 'Source')}</p>`;
     if (mapObj && mapObj.getLayer('h-sel')) mapObj.setFilter('h-sel', ['==', ['get', 'n'], -1]);
     routeTo(p, quiet); drawList(); icons(); grpStatus();
+  }
+  /* auto 3D fly-around tour */
+  let tourTok = 0, touring = false;
+  const brg = l => { const a = l[0], b = l[l.length - 1], k = Math.cos(a[1] * Math.PI / 180); return Math.atan2((b[0] - a[0]) * k, b[1] - a[1]) * 180 / Math.PI; };
+  const wait = (ms, t) => new Promise(r => setTimeout(() => r(t === tourTok), ms));
+  const camTo = (o, t) => new Promise(r => { if (t !== tourTok || !mapObj) return r(false); mapObj.once('moveend', () => r(t === tourTok)); mapObj.flyTo({ ...o, essential: true }); });
+  const hud = (ti, tx, f) => { $('#tHud').style.display = ''; $('#tTi').textContent = ti; $('#tTx').textContent = tx; $('#tBar').style.width = (f * 100) + '%'; };
+  function stopTour() {
+    if (!touring) return; touring = false; tourTok++;
+    if ($('#tBtn')) { $('#tBtn').textContent = 'Replay tour'; $('#tTi').textContent = 'Tour paused'; $('#tTx').textContent = 'Drag, zoom or pick a hole to explore'; }
+  }
+  async function startTour() {
+    if (!mapObj) return; const t = ++tourTok; touring = true; $('#tBtn').textContent = 'Stop';
+    const ctr = [-96.8495, 33.2068], zAdj = mob ? -0.7 : 0;
+    hud('Fields Ranch East', 'Course reveal · 2027 championship routing', 0);
+    if (!await camTo({ center: ctr, zoom: 14.9 + zAdj, pitch: 58, bearing: -30, duration: 2600 }, t)) return;
+    if (!await camTo({ center: ctr, zoom: 15.1 + zAdj, pitch: 62, bearing: 60, duration: 5200, curve: 1 }, t)) return;
+    for (const h of C.holes) {
+      if (t !== tourTok) return;
+      const b = brg(h.line), c = along(h.line, .5), z = Math.min(17.6, 17.9 - h.yds / 520) + zAdj;
+      pickH(h.n, true, true); if (mapObj.getSource('route')) mapObj.getSource('route').setData({ type: 'FeatureCollection', features: [] });
+      hud(`Hole ${h.n} · Par ${h.par} · ${h.yds} yds`, h.note || '', h.n / 18);
+      if (!await camTo({ center: c, zoom: z, pitch: 64, bearing: b, duration: 2800, curve: 1.2 }, t)) return;
+      if (!await camTo({ center: along(h.line, .62), zoom: z + .25, pitch: 66, bearing: b + 22, duration: 2600, easing: x => x }, t)) return;
+    }
+    hud('That\u2019s the 2027 routing', 'Finishing at the 18th beside the PGA District', 1);
+    if (!await camTo({ center: ctr, zoom: 15 + zAdj, pitch: 55, bearing: 180, duration: 4200 }, t)) return;
+    touring = false; $('#tBtn').textContent = 'Replay tour'; $('#tTi').textContent = 'Tour complete';
   }
   /* simulated featured group */
   let gPos = null; // fractional hole index 0..18
@@ -337,14 +373,14 @@ function vFrisco() {
       <div id="fl" style="display:flex;flex-direction:column;gap:8px">${list.map(f => `<button class="wp" data-id="${f.id}"><div class="place"><div class="ic"><i data-lucide="${icon(f.kind)}"></i></div><div><b>${esc(f.name)}</b><div class="meta">${esc(f.kind)}${f.addr ? ' · ' + esc(f.addr) : ''}</div><div class="meta">${fmtDist(f.m)} · ~${driveMin(f.m)} min drive (est.)</div></div></div></button>`).join('')}</div>
       <p class="src">Drive times are straight-line estimates; Google Maps gives live traffic. Locations geocoded with Esri; map data © OpenStreetMap contributors.</p>
     </div>
-    <div class="map-wrap"><div id="mapEl"></div></div>
+    <div class="map-wrap"><div id="mapEl"></div><div class="tour-hud" id="tHud" style="display:none"><i class="dot"></i><b id="tTi">Course tour</b><span id="tTx"></span><button id="tBtn">Stop</button><i class="tour-bar" id="tBar" style="width:0"></i></div></div>
   </div>`;
   mapObj = new maplibregl.Map({ container: 'mapEl', style: darkStyle(), center: [-96.9, 33.05], zoom: innerWidth < 700 ? 9 : 10, attributionControl: { compact: true } });
   mapObj.addControl(new maplibregl.NavigationControl(), 'bottom-right');
   const pga = document.createElement('div'); pga.className = 'mk qr'; pga.innerHTML = qrSvg; pga.title = 'PGA Frisco';
   new maplibregl.Marker({ element: pga }).setLngLat([COURSE_C.lng, COURSE_C.lat]).setPopup(new maplibregl.Popup({ offset: 14 }).setHTML('<b>PGA Frisco</b><br>Fields Ranch East')).addTo(mapObj);
   const mks = {};
-  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#5aa9e6' : '#3e9b5f'; mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#f0d27a">Google Maps</a>`)).addTo(mapObj); });
+  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#4FD1E8' : '#22C08A'; mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#ff9fcf">Google Maps</a>`)).addTo(mapObj); });
   $$('#fl .wp').forEach(b => b.onclick = () => { const f = list.find(x => x.id === b.dataset.id); $$('#fl .wp').forEach(x => x.classList.toggle('sel', x === b)); mapObj.flyTo({ center: [f.lng, f.lat], zoom: 12 }); mks[f.id].togglePopup(); if (f.kind !== 'Airport') { prefs.eve = f.id; savePrefs(); toast(`${f.name} set as your evening plan`); } });
 }
 
