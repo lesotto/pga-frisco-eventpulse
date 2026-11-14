@@ -322,3 +322,11 @@ body.m-real [data-simblock]{display:none}
 @media(max-width:760px){.eos-comp{grid-template-columns:1fr 1fr}.rb{grid-template-columns:110px 1fr 74px}.roi-big b{font-size:36px}.eos{width:112px;height:112px}}
 .roi-big p b{display:inline;font:700 13.5px Inter,sans-serif;color:var(--ink);text-shadow:none}
 body.m-real .roi-grid{align-items:start}
+
+.roi-print{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+.roi-print>span{width:100%;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;font-weight:700}
+.rp-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:10px;background:linear-gradient(90deg,#E84C9A,#F07A2A);color:#fff!important;font-weight:700;font-size:13px;text-decoration:none;max-width:100%}
+.rp-btn b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rp-btn.ghost{background:transparent;border:1px solid rgba(79,209,232,.5);color:#4FD1E8!important}
+.rp-btn.sm{margin-top:12px;font-size:12px;padding:7px 12px}
+.rp-btn::before{content:"⎙";font-size:15px;line-height:1}

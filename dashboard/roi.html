@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sponsor ROI Summary · EventPulse · 2027 PGA Championship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./roi.css">
+</head>
+<body>
+<div class="bar no-print">
+  <a class="back" href="./#roi">← Sponsor Ledger</a>
+  <label>Sponsor <select id="pick"></select></label>
+  <div class="seg" id="mode"><button data-m="real">Real data</button><button data-m="sim">Simulated preview</button></div>
+  <label class="chk"><input type="checkbox" id="all"> All sponsors</label>
+  <button class="print" id="print">Print / Save as PDF</button>
+</div>
+<main id="pages"></main>
+<script src="../data.js"></script>
+<script src="./dash-data.js"></script>
+<script src="./roi-model.js"></script>
+<script src="./roi.js"></script>
+</body>
+</html>

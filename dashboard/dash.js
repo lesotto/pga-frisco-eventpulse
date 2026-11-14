@@ -137,6 +137,7 @@ function spDetail() {
       <h3>${esc(s.n)}</h3><div class="tr">${esc(s.tier)} · ${esc(s.cat)}</div>
       <p>${esc(s.act)} ${src(s.s)}</p>
       <div class="simph on"><span class="tag sim">Not measured yet</span><p>Exposure, behavior, sentiment and redemptions for ${esc(s.n)} start counting when fans use the guide during championship week. No real figures exist yet, so none are shown here.</p><button class="btn-sim" data-go-sim>See the simulated preview</button></div>`;
+    $('#spDetail').insertAdjacentHTML('beforeend', `<a class="rp-btn sm" data-roi-print="one" target="_blank" rel="noopener" href="./roi.html?s=${encodeURIComponent(s.n)}&mode=real">Print one-page ROI summary</a>`);
     $$('#spDetail [data-go-sim]').forEach(b => b.onclick = () => setMode('sim'));
     return;
   }
@@ -148,6 +149,7 @@ function spDetail() {
     <div class="ledger"><div><span>Exposure</span><b>${fmtK(m.exp)}</b></div><div><span>Behavior</span><b>${fmtK(m.beh)}</b></div><div><span>Sentiment</span><b>${Math.round(m.sent)}/100</b></div><div><span>Redemptions</span><b>${fmtK(m.red)}</b></div></div>
     <div class="chart xs"><canvas id="chSp"></canvas></div>
     <p class="note">Simulated. Exposure means impressions across the guide, on-site moments and digital. Behavior means visits, dwell time and taps. Redemptions are offers claimed. The numbers scale with activation size and a simulated attendance curve. They are not measurements.</p>`;
+  $('#spDetail').insertAdjacentHTML('beforeend', `<a class="rp-btn sm" data-roi-print="one" target="_blank" rel="noopener" href="./roi.html?s=${encodeURIComponent(s.n)}&mode=sim">Print one-page ROI summary</a>`);
   const ctx = $('#chSp').getContext('2d');
   const hrs = hourCurve(h => Math.max(0, onGrounds(h * 60) / att[SAT]) * s.w * s.r * 100 * jitter(.08));
   charts.sp = new Chart(ctx, { type: 'line', data: { labels: hourCurve(h => (h > 12 ? h - 12 : h) + (h >= 12 ? 'p' : 'a')), datasets: [{ data: hrs, borderColor: s.c, backgroundColor: vgrad(ctx, s.c), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Engagement by hour · ' + (st.mode === 'sim' ? 'simulated Saturday' : 'simulated Saturday'), color: '#7a76a0', font: { size: 11 } } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
@@ -162,32 +164,14 @@ function spCharts() {
 
 
 /* ---------- ROI summary + Event Outcome Score (simulated) ---------- */
-const RATE = { cpm: 28, beh: 1.1, aov: 42, margin: .6 };
-const roiData = (() => {
-  const rows = sponsors.map((s, i) => { seed = 500 + i * 53;
-    const inv = Math.round(s.w * 400000 * (.55 + rnd() * 1.05) / 5000) * 5000;
-    const q = .6 + rnd() * .8;
-    const exp = s.w * s.r * 2.4e6 * (.75 + rnd() * .5), beh = exp * (.024 + s.w * .01) * q, red = beh * (.12 + s.w * .04) * (.6 + rnd() * .8), sent = Math.min(94, Math.max(38, s.sentBase - 12 + rnd() * 26));
-    const media = exp / 1000 * RATE.cpm, eng = beh * RATE.beh, rev = red * RATE.aov * RATE.margin, val = media + eng + rev;
-    return { s, inv, exp, beh, red, sent, media, eng, rev, val, roi: (val - inv) / inv };
-  });
-  const per = k => rows.map(r => r[k] / r.inv), rng = a => [Math.min(...a), Math.max(...a)];
-  const R = { exp: rng(per('exp')), beh: rng(per('beh')), red: rng(per('red')) };
-  const sc = (v, [lo, hi]) => 30 + 70 * (v - lo) / (hi - lo);
-  rows.forEach(r => { r.c = { exp: sc(r.exp / r.inv, R.exp), beh: sc(r.beh / r.inv, R.beh), sent: r.sent, red: sc(r.red / r.inv, R.red) };
-    r.eos = Math.round(.30 * r.c.exp + .25 * r.c.beh + .15 * r.c.sent + .30 * r.c.red); });
-  rows.sort((a, b) => b.eos - a.eos).forEach((r, i) => r.rank = i + 1);
-  const n = rows.length, mxs = rows.reduce((a, r) => a + r.eos, 0) / n, my = rows.reduce((a, r) => a + r.roi, 0) / n;
-  const cov = rows.reduce((a, r) => a + (r.eos - mxs) * (r.roi - my), 0), vx = rows.reduce((a, r) => a + (r.eos - mxs) ** 2, 0), vy = rows.reduce((a, r) => a + (r.roi - my) ** 2, 0);
-  const slope = cov / vx, icpt = my - slope * mxs, corr = cov / Math.sqrt(vx * vy);
-  return { rows, slope, icpt, corr };
-})();
+const { RATE } = window.ROIM, roiData = window.ROIM;
 const band = e => e >= 80 ? ['Strong', 'b-s'] : e >= 65 ? ['Solid', 'b-o'] : e >= 50 ? ['Watch', 'b-w'] : ['Underperforming', 'b-u'];
 const xr = r => (1 + r).toFixed(2) + 'x';
 function roiRender() {
   const sel = $('#roiSel');
   if (!sel.options.length) { sel.innerHTML = roiData.rows.slice().sort((a, b) => a.s.n.localeCompare(b.s.n)).map(r => `<option>${esc(r.s.n)}</option>`).join(''); sel.onchange = () => { st.sel = sel.value; spGrid(); spDetail(); }; }
   sel.value = st.sel;
+  const pq = `mode=${st.mode}`; $$('[data-roi-print="one"]').forEach(a => a.href = `./roi.html?s=${encodeURIComponent(st.sel)}&${pq}`); $$('[data-roi-print="all"]').forEach(a => a.href = `./roi.html?all=1&s=${encodeURIComponent(st.sel)}&${pq}`); const rn = $('#rpName'); if (rn) rn.textContent = st.sel;
   const r = roiData.rows.find(x => x.s.n === st.sel); if (!r) return;
   const [bl, bc] = band(r.eos);
   $('#roiName').textContent = r.s.n; $('#eosN').textContent = r.eos;

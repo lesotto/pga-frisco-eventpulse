@@ -78,6 +78,7 @@
           <div><span>Bands</span><p><b class="b-s">80+ Strong</b> · <b class="b-o">65–79 Solid</b> · <b class="b-w">50–64 Watch</b> · <b class="b-u">&lt;50 Under</b></p></div>
           <p class="note">Rates are EventPulse working assumptions, to be agreed with each sponsor before championship week. The score and ROI move together because both are scored per dollar; the real correlation will be reported from championship-week data.</p>
         </div>
+        <div class="roi-print"><span>Printable one-page ROI summary</span><a class="rp-btn" data-roi-print="one" target="_blank" rel="noopener" href="./roi.html">Print <b id="rpName">this sponsor</b></a><a class="rp-btn ghost" data-roi-print="all" target="_blank" rel="noopener" href="./roi.html?all=1">Print all sponsors</a></div>
       </div>
       <div class="card span2" data-sim data-what="every sponsor's Event Outcome Score plotted against ROI, with the correlation between them"><div class="card-h"><h3>Score vs ROI · all partners</h3><span class="tag sim">Simulated · not real data</span></div><div class="chart"><canvas id="chRoi"></canvas></div><p class="note" id="roiCorr"></p></div>
       <div class="card" data-sim data-what="sponsors ranked by Event Outcome Score with ROI"><div class="card-h"><h3>ROI leaderboard</h3><span class="tag sim">Simulated · not real data</span></div><div class="roi-port" id="roiPort"></div><div class="roi-lb" id="roiLb"></div></div>
@@ -199,6 +200,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <script src="../data.js"></script>
 <script src="./dash-data.js"></script>
+<script src="./roi-model.js"></script>
 <script src="./dash.js"></script>
 </body>
 </html>
