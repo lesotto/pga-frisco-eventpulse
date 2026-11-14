@@ -30,7 +30,7 @@
 </header>
 
 <nav class="jump" aria-label="Dashboard sections">
-  <a href="#pulse">Pulse</a><a href="#sponsors">Sponsors</a><a href="#tickets">Ticketing</a><a href="#hospitality">Hospitality</a><a href="#concessions">Concessions</a><a href="#itineraries">Itineraries</a><a href="#social">Social</a><a href="#broadcast">Broadcast</a><a href="#promos">Promotions</a><a href="#tournament">Tournament</a><a href="#frisco">Frisco</a><a href="#proof">Proof</a>
+  <a href="#pulse">Pulse</a><a href="#sponsors">Sponsors</a><a href="#roi">ROI</a><a href="#tickets">Ticketing</a><a href="#hospitality">Hospitality</a><a href="#concessions">Concessions</a><a href="#itineraries">Itineraries</a><a href="#social">Social</a><a href="#broadcast">Broadcast</a><a href="#promos">Promotions</a><a href="#tournament">Tournament</a><a href="#frisco">Frisco</a><a href="#proof">Proof</a>
 </nav>
 
 <main id="app">
@@ -56,6 +56,31 @@
     <div class="sp-wrap">
       <div class="sp-grid" id="spGrid"></div>
       <aside class="sp-detail card" id="spDetail"></aside>
+    </div>
+
+    <div class="roi-head" id="roi"><div><span class="eyebrow">Sponsor ledger · ROI summary</span><h3 class="roi-t">One score. One ROI answer.</h3><p class="mute">The Event Outcome Score (EOS) rolls the deck's four ledger measures (exposure, behavior, sentiment, redemptions) into one 0–100 number per sponsor, scored per dollar invested. ROI is the value the ledger can attribute, against what the sponsor spent to activate. The method is fixed now; the numbers arrive with championship-week data.</p></div></div>
+    <div class="grid g3 roi-grid">
+      <div class="card span2" data-sim data-what="each sponsor's investment, attributed value, ROI and Event Outcome Score"><div class="card-h"><h3>ROI summary · <span id="roiName">sponsor</span></h3><span class="tag sim">Simulated · not real data</span></div>
+        <div class="roi-pick"><label for="roiSel">Sponsor</label><select id="roiSel"></select></div>
+        <div class="roi-top">
+          <div class="eos"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" class="eos-bg"/><circle cx="60" cy="60" r="50" class="eos-fg" id="eosArc"/></svg><div class="eos-n"><b id="eosN">0</b><span>EOS</span></div></div>
+          <div class="roi-big"><span>ROI multiple · value ÷ investment</span><b id="roiX">—</b><em id="roiBand"></em><p id="roiLine" class="mute"></p></div>
+        </div>
+        <div class="roi-break" id="roiBreak"></div>
+        <div class="eos-comp" id="eosComp"></div>
+        <p class="note">Simulated. Investment is an illustrative championship-week activation spend, not the sponsor's rights fee, which is not public. Values use the stated rates in the method panel. Generated in your browser; not measurements.</p>
+      </div>
+      <div class="card"><div class="card-h"><h3>How the score and ROI work</h3><span class="tag real">Method · fixed</span></div>
+        <div class="meth">
+          <div><span>Event Outcome Score (0–100)</span><p>Each ledger measure is taken per dollar invested and scaled from 30 (weakest in the field) to 100 (strongest). Sentiment uses its net score. Then weighted:</p>
+            <ul class="w"><li><i style="background:#4FD1E8"></i>Exposure · impressions per $<b>30%</b></li><li><i style="background:#8B5CF6"></i>Behavior · visits, dwell, taps per $<b>25%</b></li><li><i style="background:#22C08A"></i>Sentiment · net score<b>15%</b></li><li><i style="background:#E84C9A"></i>Redemptions · offers claimed per $<b>30%</b></li></ul></div>
+          <div><span>ROI</span><p class="fx">(Attributed value − Investment) ÷ Investment</p><p>Attributed value = media value (impressions × $28 CPM) + engagement value (behaviors × $1.10) + redemption margin (redemptions × $42 order × 60%).</p></div>
+          <div><span>Bands</span><p><b class="b-s">80+ Strong</b> · <b class="b-o">65–79 Solid</b> · <b class="b-w">50–64 Watch</b> · <b class="b-u">&lt;50 Under</b></p></div>
+          <p class="note">Rates are EventPulse working assumptions, to be agreed with each sponsor before championship week. The score and ROI move together because both are scored per dollar; the real correlation will be reported from championship-week data.</p>
+        </div>
+      </div>
+      <div class="card span2" data-sim data-what="every sponsor's Event Outcome Score plotted against ROI, with the correlation between them"><div class="card-h"><h3>Score vs ROI · all partners</h3><span class="tag sim">Simulated · not real data</span></div><div class="chart"><canvas id="chRoi"></canvas></div><p class="note" id="roiCorr"></p></div>
+      <div class="card" data-sim data-what="sponsors ranked by Event Outcome Score with ROI"><div class="card-h"><h3>ROI leaderboard</h3><span class="tag sim">Simulated · not real data</span></div><div class="roi-port" id="roiPort"></div><div class="roi-lb" id="roiLb"></div></div>
     </div>
     <div class="grid g2">
       <div class="card"><div class="card-h"><h3>Partners by category</h3><span class="tag real">Real · Commercial Family</span></div><div class="chart"><canvas id="chCat"></canvas></div></div>

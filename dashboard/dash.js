@@ -128,6 +128,7 @@ function spGrid() {
   $$('#spGrid .sp').forEach(b => b.onclick = () => { st.sel = b.dataset.n; spGrid(); spDetail(); });
 }
 function spDetail() {
+  roiRender();
   const s = sponsors.find(x => x.n === st.sel), m = sp(s);
   if (charts.sp) { charts.sp.destroy(); charts.sp = null; }
   if (st.mode !== 'sim') {
@@ -159,6 +160,61 @@ function spCharts() {
   $('#funnel').innerHTML = rows.map(([l, v, w], i) => `<div class="f"><span style="width:${Math.min(100, w).toFixed(1)}%"></span><p>${l}<b>${i === 2 ? v.toFixed(1) + '/100' : fmtK(v)}</b></p></div>`).join('');
 }
 
+
+/* ---------- ROI summary + Event Outcome Score (simulated) ---------- */
+const RATE = { cpm: 28, beh: 1.1, aov: 42, margin: .6 };
+const roiData = (() => {
+  const rows = sponsors.map((s, i) => { seed = 500 + i * 53;
+    const inv = Math.round(s.w * 400000 * (.55 + rnd() * 1.05) / 5000) * 5000;
+    const q = .6 + rnd() * .8;
+    const exp = s.w * s.r * 2.4e6 * (.75 + rnd() * .5), beh = exp * (.024 + s.w * .01) * q, red = beh * (.12 + s.w * .04) * (.6 + rnd() * .8), sent = Math.min(94, Math.max(38, s.sentBase - 12 + rnd() * 26));
+    const media = exp / 1000 * RATE.cpm, eng = beh * RATE.beh, rev = red * RATE.aov * RATE.margin, val = media + eng + rev;
+    return { s, inv, exp, beh, red, sent, media, eng, rev, val, roi: (val - inv) / inv };
+  });
+  const per = k => rows.map(r => r[k] / r.inv), rng = a => [Math.min(...a), Math.max(...a)];
+  const R = { exp: rng(per('exp')), beh: rng(per('beh')), red: rng(per('red')) };
+  const sc = (v, [lo, hi]) => 30 + 70 * (v - lo) / (hi - lo);
+  rows.forEach(r => { r.c = { exp: sc(r.exp / r.inv, R.exp), beh: sc(r.beh / r.inv, R.beh), sent: r.sent, red: sc(r.red / r.inv, R.red) };
+    r.eos = Math.round(.30 * r.c.exp + .25 * r.c.beh + .15 * r.c.sent + .30 * r.c.red); });
+  rows.sort((a, b) => b.eos - a.eos).forEach((r, i) => r.rank = i + 1);
+  const n = rows.length, mxs = rows.reduce((a, r) => a + r.eos, 0) / n, my = rows.reduce((a, r) => a + r.roi, 0) / n;
+  const cov = rows.reduce((a, r) => a + (r.eos - mxs) * (r.roi - my), 0), vx = rows.reduce((a, r) => a + (r.eos - mxs) ** 2, 0), vy = rows.reduce((a, r) => a + (r.roi - my) ** 2, 0);
+  const slope = cov / vx, icpt = my - slope * mxs, corr = cov / Math.sqrt(vx * vy);
+  return { rows, slope, icpt, corr };
+})();
+const band = e => e >= 80 ? ['Strong', 'b-s'] : e >= 65 ? ['Solid', 'b-o'] : e >= 50 ? ['Watch', 'b-w'] : ['Underperforming', 'b-u'];
+const xr = r => (1 + r).toFixed(2) + 'x';
+function roiRender() {
+  const sel = $('#roiSel');
+  if (!sel.options.length) { sel.innerHTML = roiData.rows.slice().sort((a, b) => a.s.n.localeCompare(b.s.n)).map(r => `<option>${esc(r.s.n)}</option>`).join(''); sel.onchange = () => { st.sel = sel.value; spGrid(); spDetail(); }; }
+  sel.value = st.sel;
+  const r = roiData.rows.find(x => x.s.n === st.sel); if (!r) return;
+  const [bl, bc] = band(r.eos);
+  $('#roiName').textContent = r.s.n; $('#eosN').textContent = r.eos;
+  const arc = $('#eosArc'), L = 2 * Math.PI * 50; arc.style.strokeDasharray = L; arc.style.strokeDashoffset = L * (1 - r.eos / 100);
+  $('#roiX').textContent = xr(r.roi); $('#roiBand').className = bc; $('#roiBand').textContent = `${bl} · rank ${r.rank} of ${roiData.rows.length}`;
+  $('#roiLine').innerHTML = `Every $1 invested returns <b>$${(1 + r.roi).toFixed(2)}</b> in attributed value. Net ROI <b>${r.roi >= 0 ? '+' : ''}${Math.round(r.roi * 100)}%</b>: ${money(r.val - r.inv)} net on ${money(r.inv)} invested.`;
+  const parts = [['Investment', r.inv, '#7a76a0'], ['Media value', r.media, '#4FD1E8'], ['Engagement value', r.eng, '#8B5CF6'], ['Redemption margin', r.rev, '#E84C9A'], ['Attributed value', r.val, '#22C08A']];
+  const top = Math.max(r.inv, r.val);
+  $('#roiBreak').innerHTML = parts.map(([l, v, c], i) => `<div class="rb${i === 4 ? ' tot' : ''}"><span>${l}</span><div><i style="width:${(v / top * 100).toFixed(1)}%;background:${c}"></i></div><b>${money(v)}</b></div>`).join('');
+  $('#eosComp').innerHTML = [['Exposure', r.c.exp, '30%', '#4FD1E8', fmtK(r.exp) + ' impr.'], ['Behavior', r.c.beh, '25%', '#8B5CF6', fmtK(r.beh) + ' actions'], ['Sentiment', r.c.sent, '15%', '#22C08A', Math.round(r.sent) + '/100 net'], ['Redemptions', r.c.red, '30%', '#E84C9A', fmtK(r.red) + ' claimed']]
+    .map(([l, v, w, c, raw]) => `<div class="ec"><span>${l} <small>${w}</small></span><b style="color:${c}">${Math.round(v)}</b><div><i style="width:${Math.min(100, v)}%;background:${c}"></i></div><em>${raw}</em></div>`).join('');
+  const T = roiData.rows.reduce((a, x) => (a.i += x.inv, a.v += x.val, a.e += x.eos, a), { i: 0, v: 0, e: 0 });
+  $('#roiPort').innerHTML = `<div><span>Portfolio ROI</span><b>${xr((T.v - T.i) / T.i)}</b></div><div><span>Avg EOS</span><b>${Math.round(T.e / roiData.rows.length)}</b></div><div><span>Invested</span><b>${money(T.i)}</b></div><div><span>Value</span><b>${money(T.v)}</b></div>`;
+  $('#roiLb').innerHTML = roiData.rows.map(x => { const [l, c] = band(x.eos); return `<button class="lb${x.s.n === st.sel ? ' on' : ''}" data-n="${esc(x.s.n)}"><span class="rk">${x.rank}</span><span class="nm">${esc(x.s.n)}</span><span class="sc ${c}">${x.eos}</span><span class="rx">${xr(x.roi)}</span></button>`; }).join('');
+  $$('#roiLb .lb').forEach(b => b.onclick = () => { st.sel = b.dataset.n; spGrid(); spDetail(); });
+  const pts = roiData.rows.map(x => ({ x: x.eos, y: +(1 + x.roi).toFixed(2), n: x.s.n }));
+  const xs = pts.map(p => p.x), x0 = Math.min(...xs) - 2, x1 = Math.max(...xs) + 2;
+  const line = [{ x: x0, y: 1 + roiData.icpt + roiData.slope * x0 }, { x: x1, y: 1 + roiData.icpt + roiData.slope * x1 }];
+  const colors = pts.map(p => p.n === st.sel ? '#F5B83D' : 'rgba(232,76,154,.75)'), radii = pts.map(p => p.n === st.sel ? 9 : 5);
+  if (!charts.roi) {
+    charts.roi = new Chart($('#chRoi').getContext('2d'), { type: 'scatter', data: { datasets: [{ label: 'Sponsors', data: pts, backgroundColor: colors, pointRadius: radii, pointHoverRadius: 9 }, { type: 'line', label: 'Fit', data: line, borderColor: '#4FD1E8', borderDash: [6, 5], borderWidth: 2, pointRadius: 0 }] },
+      options: { animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.datasetIndex ? '' : `${c.raw.n}: EOS ${c.raw.x} · ROI ${c.raw.y.toFixed(2)}x` } } }, scales: { x: { title: { display: true, text: 'Event Outcome Score (0–100)' } }, y: { title: { display: true, text: 'ROI multiple (value ÷ investment)' }, ticks: { callback: v => v.toFixed(1) + 'x' } } },
+        onClick: (e, els) => { const el = els.find(x => x.datasetIndex === 0); if (el) { st.sel = pts[el.index].n; spGrid(); spDetail(); } } } });
+  } else { const d = charts.roi.data.datasets[0]; d.backgroundColor = colors; d.pointRadius = radii; charts.roi.update('none'); }
+  const per10 = roiData.slope * 10;
+  $('#roiCorr').innerHTML = `Simulated. Correlation between score and ROI: <b>r = ${roiData.corr.toFixed(2)}</b>. Each 10 points of EOS goes with about <b>${per10.toFixed(2)}x</b> more ROI in this simulation. Click a dot to open that sponsor.`;
+}
 /* ---------- ticketing ---------- */
 function tickets() {
   const ctx = $('#chTix').getContext('2d');
@@ -352,7 +408,7 @@ function proof() {
     ['Engage · every fan, no download', '88%', 'of 93 beta visitors opened the map at The Concession (Senior PGA, April 2026), with about 3x longer sessions. The guide panels show the same behavior at championship scale.', '#itineraries', 'Company-reported'],
     ['Measure · proof, not reach', '87,860', 'Personalization surfaces served at SEAT 2026 in Charlotte (14,697 pageviews, 643 uniques). Each surface becomes a ledger row per sponsor.', '#sponsors', 'Company-reported'],
     ['Transact · lower acquisition cost', '$8.86', 'Cost per acquisition for the VIP Play sportsbook campaign, against a $350–900 baseline. Redemptions per promotion are tracked the same way.', '#promos', 'Company-reported'],
-    ['Event Outcome Ledger', `${sponsors.length}`, 'Real partners, each with exposure, behavior, sentiment and redemptions on one ledger: the deck\'s "proof for every event and sponsor."', '#sponsors', 'Real partner list'],
+    ['Event Outcome Ledger', `${sponsors.length}`, 'Real partners on one ledger. Exposure, behavior, sentiment and redemptions roll up to one Event Outcome Score and an ROI summary per sponsor: the deck\'s "proof for every event and sponsor."', '#roi', 'Real partner list'],
     ['Local Knowledge Graph', '200K+', 'Attendees expected, with a before-and-after local data signal. The Frisco panel joins city, weather, mobility and hospitality baselines.', '#frisco', 'Real baseline'],
     ['Real-time marketing', '~500M', 'Households reached by the broadcast. Odds, sentiment and media signals join on-site behavior for sponsor timing.', '#broadcast', 'Real'],
     ['Win the sponsor', '10 mo.', 'Ahead of first tee, Frisco had set the gross revenue record. Demand is proven, so sponsors will ask for proof of outcomes. That is what this ledger is for.', '#tickets', 'Real'],
