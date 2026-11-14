@@ -247,3 +247,14 @@ body.fullmap .foot{display:none}
   .map-ctrl .chip{padding:5px 9px;font-size:11.5px}
   .map-ctrl{gap:4px;right:56px}
 }
+
+.ydt-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.ydtab{width:100%;border-collapse:collapse;font-size:13px}
+.ydtab th{text-align:left;font:700 11px var(--f-d);letter-spacing:.06em;text-transform:uppercase;color:var(--mute,#9aa3c0);padding:6px 6px;border-bottom:1px solid var(--line2)}
+.ydtab td{padding:6px;border-bottom:1px solid var(--line)}
+.ydtab td.num,.ydtab th:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+.ydtab tr[data-h]{cursor:pointer}
+.ydtab tr[data-h]:hover td{background:rgba(255,255,255,.04)}
+.ydtab tr.on td{background:rgba(224,189,85,.14)}
+.ydtab tr.tot td{font-weight:700;background:rgba(255,255,255,.05);border-bottom:1px solid var(--line2)}
+.ydtab td.dim{color:var(--mute,#9aa3c0)}

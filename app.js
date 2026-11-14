@@ -233,8 +233,9 @@ function vCourse() {
       <div class="detail" id="det"></div>
       <div class="detail" id="grp"><span class="tag sim">Simulated live round</span><h3 style="margin-top:8px;font-size:20px">Follow a featured group</h3><p class="mute" style="margin:0;font-size:13px">A demo group moves around the course about 14 minutes per hole. EventPulse tells you when to walk to your hole so you arrive before they do.</p><div id="grpS" style="margin-top:8px;font-size:13px"></div><div class="acts"><button class="btn sm" id="grpGo"><i data-lucide="play"></i>Start demo round</button></div></div>
       <div><b style="font-size:14px">Holes</b><div class="holes" id="hl">${C.holes.map(h => `<button data-h="${h.n}">${h.n}</button>`).join('')}</div></div>
-      <div class="tblwrap"><table class="score"><tr><th>Hole</th>${C.holes.slice(0, 9).map(h => `<th>${h.n}</th>`).join('')}<th>Out</th></tr><tr><td class="dim">Par</td>${C.holes.slice(0, 9).map(h => `<td>${h.par}</td>`).join('')}<td>36</td></tr><tr><td class="dim">Yds</td>${C.holes.slice(0, 9).map(h => `<td>${h.yds}</td>`).join('')}<td>3,970</td></tr></table>
-      <table class="score" style="margin-top:6px"><tr><th>Hole</th>${C.holes.slice(9).map(h => `<th>${h.n}</th>`).join('')}<th>In</th></tr><tr><td class="dim">Par</td>${C.holes.slice(9).map(h => `<td>${h.par}</td>`).join('')}<td>36</td></tr><tr><td class="dim">Yds</td>${C.holes.slice(9).map(h => `<td>${h.yds}</td>`).join('')}<td>3,893</td></tr></table></div>
+      <div class="ydt"><div class="ydt-h"><b style="font-size:14px">2027 yardage · hole by hole</b><span class="tag">Championship tees</span></div>
+      <table class="ydtab"><thead><tr><th>Hole</th><th>Par</th><th>Yards</th><th>Daily</th><th>Notes</th></tr></thead><tbody>${(() => { const sum = a => a.reduce((t, h) => t + h.yds, 0), par = a => a.reduce((t, h) => t + h.par, 0), F = C.holes.slice(0, 9), B = C.holes.slice(9), hs = { 8: '8 Green deck', 9: 'Choctaw Icehouse', 11: 'Wanamaker Club', 17: 'Signature par 3', 18: 'Finishing hole', 1: 'Opening tee' }; const row = h => `<tr data-h="${h.n}"><td><b>${h.n}</b></td><td>${h.par}</td><td class="num">${h.yds}</td><td class="dim">${h.daily || ''}</td><td class="dim">${hs[h.n] || ''}</td></tr>`, tot = (l, a) => `<tr class="tot"><td>${l}</td><td>${par(a)}</td><td class="num">${sum(a).toLocaleString()}</td><td></td><td></td></tr>`; return F.map(row).join('') + tot('Out', F) + B.map(row).join('') + tot('In', B) + tot('Total', C.holes); })()}</tbody></table>
+      <p class="src" style="margin-top:6px">"Daily" is the hole's everyday number before the 2027 nine swap. Tap a row to see the hole on the map.</p></div>
       <div id="list"></div>
       <p class="src">2027 championship routing: the front and back nines are swapped from daily play (${ext(S.swap, 'Dallas Morning News')}, ${ext(S.gca, 'Golf Club Atlas')}), so hole numbers here follow the championship order. Hole geometry and course boundary: ${ext(S.osm, 'OpenStreetMap')}. Yardages: ${ext(S.card, 'championship tees')} (championship-week setup may differ). Hospitality pins are placed from official venue descriptions and are approximate. The entrance, parking and shuttle locations aren’t published yet, so they’re not on the map.</p>
     </div>
@@ -267,6 +268,7 @@ function vCourse() {
     $('#list').innerHTML = P.pois.filter(p => on.has(p.cat)).map(p => `<button class="poi ${p.id === selP ? 'sel' : ''}" data-id="${p.id}"><span class="dot" style="background:${CATS[p.cat][1]}"></span><div><b>${esc(p.name)}${p.qr ? ' · QR' : ''}</b><span>${fmtDist(dist(you, p))} from you${p.approx ? ' · approx.' : ''}</span></div></button>`).join('');
     $$('#list .poi').forEach(b => b.onclick = () => pickP(b.dataset.id));
     $$('#hl button').forEach(b => b.classList.toggle('on', +b.dataset.h === selH));
+    $$('.ydtab tr[data-h]').forEach(r => r.classList.toggle('on', +r.dataset.h === selH));
   };
   const on = new Set(Object.keys(CATS));
   const routeTo = (p, quiet, z) => { if (mapObj && mapObj.getSource('route')) { mapObj.getSource('route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[you.lng, you.lat], [p.lng, p.lat]] } }); if (!quiet) mapObj.flyTo({ center: [p.lng, p.lat], zoom: z || 16.5, speed: .9 }); } };
@@ -312,6 +314,7 @@ function vCourse() {
     toast('Simulated featured group started 3 holes before your target');
   };
   $$('#hl button').forEach(b => b.onclick = () => pickH(+b.dataset.h));
+  $$('.ydtab tr[data-h]').forEach(r => r.onclick = () => pickH(+r.dataset.h));
   $$('#cats .chip[data-c]').forEach(c => c.onclick = () => { const k = c.dataset.c; on.has(k) ? on.delete(k) : on.add(k); c.classList.toggle('on'); Object.entries(markers).forEach(([id, mk]) => { const p = poiById(id); if (p) mk.getElement().style.display = on.has(p.cat) ? '' : 'none'; }); drawList(); });
   $('#me').onclick = () => {
     if (!navigator.geolocation) return toast('Location not available in this browser');
