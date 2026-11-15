@@ -21,11 +21,11 @@ function arrivedFrac(m) { const h = m / 60; return 1 / (1 + Math.exp(-(h - 9.6) 
 const hourCurve = (fn) => { const r = []; for (let h = 7; h <= 19; h++) r.push(fn(h)); return r; };
 
 /* ---------- chart defaults ---------- */
-Chart.defaults.color = '#a7a3c9'; Chart.defaults.font.family = 'Inter, system-ui, sans-serif'; Chart.defaults.font.size = 11.5;
-Chart.defaults.borderColor = 'rgba(160,150,255,.12)'; Chart.defaults.plugins.legend.labels.boxWidth = 10; Chart.defaults.plugins.legend.labels.boxHeight = 10;
-Chart.defaults.plugins.tooltip.backgroundColor = '#1a1640'; Chart.defaults.plugins.tooltip.borderColor = 'rgba(232,76,154,.5)'; Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.color = '#a3b4c9'; Chart.defaults.font.family = 'Inter, system-ui, sans-serif'; Chart.defaults.font.size = 11.5;
+Chart.defaults.borderColor = 'rgba(130,190,225,.12)'; Chart.defaults.plugins.legend.labels.boxWidth = 10; Chart.defaults.plugins.legend.labels.boxHeight = 10;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1a1640'; Chart.defaults.plugins.tooltip.borderColor = 'rgba(58,141,222,.5)'; Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.maintainAspectRatio = false; Chart.defaults.animation.duration = 700;
-const C = { pink: '#E84C9A', orange: '#F07A2A', cyan: '#4FD1E8', purple: '#8B5CF6', green: '#22C08A', amber: '#F5B83D', red: '#F25C6A' };
+const C = { pink: '#3A8DDE', orange: '#3FB67A', cyan: '#4FD1E8', purple: '#5B7FE0', green: '#22C08A', amber: '#F5B83D', red: '#F25C6A' };
 const grad = (ctx, a, b) => { const g = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0); g.addColorStop(0, a); g.addColorStop(1, b); return g; };
 const vgrad = (ctx, a) => { const g = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height || 260); g.addColorStop(0, a + 'aa'); g.addColorStop(1, a + '05'); return g; };
 const charts = {};
@@ -152,7 +152,7 @@ function spDetail() {
   $('#spDetail').insertAdjacentHTML('beforeend', `<a class="rp-btn sm" data-roi-print="one" target="_blank" rel="noopener" href="./roi.html?s=${encodeURIComponent(s.n)}&mode=sim">Print one-page ROI summary</a>`);
   const ctx = $('#chSp').getContext('2d');
   const hrs = hourCurve(h => Math.max(0, onGrounds(h * 60) / att[SAT]) * s.w * s.r * 100 * jitter(.08));
-  charts.sp = new Chart(ctx, { type: 'line', data: { labels: hourCurve(h => (h > 12 ? h - 12 : h) + (h >= 12 ? 'p' : 'a')), datasets: [{ data: hrs, borderColor: s.c, backgroundColor: vgrad(ctx, s.c), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Engagement by hour · ' + (st.mode === 'sim' ? 'simulated Saturday' : 'simulated Saturday'), color: '#7a76a0', font: { size: 11 } } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
+  charts.sp = new Chart(ctx, { type: 'line', data: { labels: hourCurve(h => (h > 12 ? h - 12 : h) + (h >= 12 ? 'p' : 'a')), datasets: [{ data: hrs, borderColor: s.c, backgroundColor: vgrad(ctx, s.c), fill: true, tension: .4, pointRadius: 0, borderWidth: 2 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Engagement by hour · ' + (st.mode === 'sim' ? 'simulated Saturday' : 'simulated Saturday'), color: '#7890a8', font: { size: 11 } } }, scales: { y: { display: false }, x: { grid: { display: false } } } } });
 }
 function spCharts() {
   if (!charts.cat) { const byCat = {}; sponsors.forEach(s => byCat[s.cat] = (byCat[s.cat] || 0) + 1); const e = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
@@ -178,10 +178,10 @@ function roiRender() {
   const arc = $('#eosArc'), L = 2 * Math.PI * 50; arc.style.strokeDasharray = L; arc.style.strokeDashoffset = L * (1 - r.eos / 100);
   $('#roiX').textContent = xr(r.roi); $('#roiBand').className = bc; $('#roiBand').textContent = `${bl} · rank ${r.rank} of ${roiData.rows.length}`;
   $('#roiLine').innerHTML = `Every $1 invested returns <b>$${(1 + r.roi).toFixed(2)}</b> in attributed value. Net ROI <b>${r.roi >= 0 ? '+' : ''}${Math.round(r.roi * 100)}%</b>: ${money(r.val - r.inv)} net on ${money(r.inv)} invested.`;
-  const parts = [['Investment', r.inv, '#7a76a0'], ['Media value', r.media, '#4FD1E8'], ['Engagement value', r.eng, '#8B5CF6'], ['Redemption margin', r.rev, '#E84C9A'], ['Attributed value', r.val, '#22C08A']];
+  const parts = [['Investment', r.inv, '#7890a8'], ['Media value', r.media, '#4FD1E8'], ['Engagement value', r.eng, '#5B7FE0'], ['Redemption margin', r.rev, '#3A8DDE'], ['Attributed value', r.val, '#22C08A']];
   const top = Math.max(r.inv, r.val);
   $('#roiBreak').innerHTML = parts.map(([l, v, c], i) => `<div class="rb${i === 4 ? ' tot' : ''}"><span>${l}</span><div><i style="width:${(v / top * 100).toFixed(1)}%;background:${c}"></i></div><b>${money(v)}</b></div>`).join('');
-  $('#eosComp').innerHTML = [['Exposure', r.c.exp, '30%', '#4FD1E8', fmtK(r.exp) + ' impr.'], ['Behavior', r.c.beh, '25%', '#8B5CF6', fmtK(r.beh) + ' actions'], ['Sentiment', r.c.sent, '15%', '#22C08A', Math.round(r.sent) + '/100 net'], ['Redemptions', r.c.red, '30%', '#E84C9A', fmtK(r.red) + ' claimed']]
+  $('#eosComp').innerHTML = [['Exposure', r.c.exp, '30%', '#4FD1E8', fmtK(r.exp) + ' impr.'], ['Behavior', r.c.beh, '25%', '#5B7FE0', fmtK(r.beh) + ' actions'], ['Sentiment', r.c.sent, '15%', '#22C08A', Math.round(r.sent) + '/100 net'], ['Redemptions', r.c.red, '30%', '#3A8DDE', fmtK(r.red) + ' claimed']]
     .map(([l, v, w, c, raw]) => `<div class="ec"><span>${l} <small>${w}</small></span><b style="color:${c}">${Math.round(v)}</b><div><i style="width:${Math.min(100, v)}%;background:${c}"></i></div><em>${raw}</em></div>`).join('');
   const T = roiData.rows.reduce((a, x) => (a.i += x.inv, a.v += x.val, a.e += x.eos, a), { i: 0, v: 0, e: 0 });
   $('#roiPort').innerHTML = `<div><span>Portfolio ROI</span><b>${xr((T.v - T.i) / T.i)}</b></div><div><span>Avg EOS</span><b>${Math.round(T.e / roiData.rows.length)}</b></div><div><span>Invested</span><b>${money(T.i)}</b></div><div><span>Value</span><b>${money(T.v)}</b></div>`;
@@ -190,7 +190,7 @@ function roiRender() {
   const pts = roiData.rows.map(x => ({ x: x.eos, y: +(1 + x.roi).toFixed(2), n: x.s.n }));
   const xs = pts.map(p => p.x), x0 = Math.min(...xs) - 2, x1 = Math.max(...xs) + 2;
   const line = [{ x: x0, y: 1 + roiData.icpt + roiData.slope * x0 }, { x: x1, y: 1 + roiData.icpt + roiData.slope * x1 }];
-  const colors = pts.map(p => p.n === st.sel ? '#F5B83D' : 'rgba(232,76,154,.75)'), radii = pts.map(p => p.n === st.sel ? 9 : 5);
+  const colors = pts.map(p => p.n === st.sel ? '#F5B83D' : 'rgba(58,141,222,.75)'), radii = pts.map(p => p.n === st.sel ? 9 : 5);
   if (!charts.roi) {
     charts.roi = new Chart($('#chRoi').getContext('2d'), { type: 'scatter', data: { datasets: [{ label: 'Sponsors', data: pts, backgroundColor: colors, pointRadius: radii, pointHoverRadius: 9 }, { type: 'line', label: 'Fit', data: line, borderColor: '#4FD1E8', borderDash: [6, 5], borderWidth: 2, pointRadius: 0 }] },
       options: { animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.datasetIndex ? '' : `${c.raw.n}: EOS ${c.raw.x} · ROI ${c.raw.y.toFixed(2)}x` } } }, scales: { x: { title: { display: true, text: 'Event Outcome Score (0–100)' } }, y: { title: { display: true, text: 'ROI multiple (value ÷ investment)' }, ticks: { callback: v => v.toFixed(1) + 'x' } } },
@@ -202,7 +202,7 @@ function roiRender() {
 /* ---------- ticketing ---------- */
 function tickets() {
   const ctx = $('#chTix').getContext('2d');
-  charts.tix = new Chart(ctx, { type: 'bar', data: { labels: tixDays.map(d => d[0] + ' · ' + d[1]), datasets: [{ label: 'Lowest resale ($)', data: tixDays.map(d => d[2]), backgroundColor: tixDays.map((d, i) => i < 3 ? 'rgba(79,209,232,.7)' : 'rgba(232,76,154,.85)'), borderRadius: 8 }] }, options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '$' + c.raw + ' lowest listed' } } }, scales: { y: { ticks: { callback: v => '$' + v } }, x: { grid: { display: false } } } } });
+  charts.tix = new Chart(ctx, { type: 'bar', data: { labels: tixDays.map(d => d[0] + ' · ' + d[1]), datasets: [{ label: 'Lowest resale ($)', data: tixDays.map(d => d[2]), backgroundColor: tixDays.map((d, i) => i < 3 ? 'rgba(79,209,232,.7)' : 'rgba(58,141,222,.85)'), borderRadius: 8 }] }, options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => '$' + c.raw + ' lowest listed' } } }, scales: { y: { ticks: { callback: v => '$' + v } }, x: { grid: { display: false } } } } });
   $('#tixStatus').innerHTML = [
     ['Championship rounds, Thu–Sun', '<span class="pill out">Sold out</span>', 'sbj'], ['Practice rounds, Mon–Wed', '<span class="pill ltd">Few left</span>', 'sbj'],
     ['Weekly & daily hospitality', '<span class="pill out">Sold out</span>', 'sbj'], ['Choctaw Ice House daily VIP', '<span class="pill out">Sold in 3 wks</span>', 'choc'],
@@ -230,7 +230,7 @@ function gateUpd() {
 /* ---------- hospitality ---------- */
 function hospitality() {
   const ctx = $('#chHosp').getContext('2d');
-  charts.hosp = new Chart(ctx, { type: 'bar', data: { labels: ['2026 record (Aronimink)', '2027 low case', '2027 high case'], datasets: [{ data: [100, 110, 120], backgroundColor: ['rgba(79,209,232,.6)', 'rgba(232,76,154,.75)', 'rgba(240,122,42,.85)'], borderRadius: 8 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Gross revenue index (2026 record = 100)', color: '#7a76a0' } }, scales: { y: { min: 80, max: 125 }, x: { grid: { display: false } } } } });
+  charts.hosp = new Chart(ctx, { type: 'bar', data: { labels: ['2026 record (Aronimink)', '2027 low case', '2027 high case'], datasets: [{ data: [100, 110, 120], backgroundColor: ['rgba(79,209,232,.6)', 'rgba(58,141,222,.75)', 'rgba(63,182,122,.85)'], borderRadius: 8 }] }, options: { plugins: { legend: { display: false }, title: { display: true, text: 'Gross revenue index (2026 record = 100)', color: '#7890a8' } }, scales: { y: { min: 80, max: 125 }, x: { grid: { display: false } } } } });
   $('#hospNote').innerHTML = `Frisco is expected to beat the 2026 record by 10% to 20% ${src('sbj')}. Charlotte 2025 did $23M+ in hospitality, and 2026 beat that. "We are a mile ahead of that" ${src('fos')}. The PGA reported $121M in tournament revenue for FY2024–25 ${src('sbj')}.`;
   $('#venues').innerHTML = [
     ['Choctaw Ice House', 'PGA District · views of the 9th green', '<span class="pill out">Sold out</span>', 'choc'],
@@ -253,9 +253,9 @@ function concessions() {
   const food = att.map(a => a * CA.food), na = att.map(a => a * CA.na), alc = att.map(a => a * CA.alcShare * CA.alcPer);
   const ctx = $('#chConc').getContext('2d');
   charts.conc = new Chart(ctx, { type: 'bar', data: { labels: tixDays.map(d => d[0]), datasets: [
-    { label: 'Free food', data: food, backgroundColor: 'rgba(240,122,42,.85)', borderRadius: 4, stack: 's' },
+    { label: 'Free food', data: food, backgroundColor: 'rgba(63,182,122,.85)', borderRadius: 4, stack: 's' },
     { label: 'Free non-alcoholic drinks', data: na, backgroundColor: 'rgba(79,209,232,.75)', borderRadius: 4, stack: 's' },
-    { label: 'Paid alcoholic drinks', data: alc, backgroundColor: 'rgba(232,76,154,.85)', borderRadius: 4, stack: 's' }] },
+    { label: 'Paid alcoholic drinks', data: alc, backgroundColor: 'rgba(58,141,222,.85)', borderRadius: 4, stack: 's' }] },
     options: { plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmtK(c.raw) } } }, scales: { y: { stacked: true, ticks: { callback: v => fmtK(v) } }, x: { stacked: true, grid: { display: false } } } } });
   const A = attTot, alcN = A * CA.alcShare * CA.alcPer;
   $('#concCalc').innerHTML = [
@@ -322,7 +322,7 @@ function broadcast() {
   ].map(([c, t, s]) => `<li><span class="call">${c}</span><a href="${S[s][1]}" target="_blank" rel="noopener">${t} ↗</a></li>`).join('');
   const types = { 'Local TV': ['wfaaRory', 'wfaaReg', 'nbcDemand', 'nbcStake', 'cbstx'], 'Local print & digital': ['dmn', 'dmnTix', 'dmnReg', 'dmnSched', 'dmnPrep', 'dmnBundle', 'ci', 'dmag'], 'National & trade': ['sbj', 'fos', 'golfweek', 'golfcom', 'friedegg', 'gm', 'gd'], 'Social & community': ['r1', 'r2', 'r3', 'r4', 'li', 'quad', 'cv'] };
   const ctx = $('#chSov').getContext('2d');
-  charts.sov = new Chart(ctx, { type: 'polarArea', data: { labels: Object.keys(types), datasets: [{ data: Object.values(types).map(a => a.length), backgroundColor: ['rgba(232,76,154,.7)', 'rgba(240,122,42,.7)', 'rgba(79,209,232,.7)', 'rgba(139,92,246,.7)'], borderColor: '#141236' }] }, options: { plugins: { legend: { position: 'right' } }, scales: { r: { ticks: { display: false }, grid: { color: 'rgba(160,150,255,.12)' } } } } });
+  charts.sov = new Chart(ctx, { type: 'polarArea', data: { labels: Object.keys(types), datasets: [{ data: Object.values(types).map(a => a.length), backgroundColor: ['rgba(58,141,222,.7)', 'rgba(63,182,122,.7)', 'rgba(79,209,232,.7)', 'rgba(91,127,224,.7)'], borderColor: '#141236' }] }, options: { plugins: { legend: { position: 'right' } }, scales: { r: { ticks: { display: false }, grid: { color: 'rgba(130,190,225,.12)' } } } } });
 }
 
 /* ---------- promotions ---------- */
@@ -352,7 +352,7 @@ function tournament() {
   const H = window.PGA.course.holes, pc = { 3: C.cyan, 4: C.purple, 5: C.pink };
   const hctx = $('#chHoles').getContext('2d');
   charts.holes = new Chart(hctx, { type: 'bar', data: { labels: H.map(h => h.n), datasets: [{ label: 'Yards', data: H.map(h => h.yds), backgroundColor: H.map(h => pc[h.par] + 'cc'), borderRadius: 4 }] },
-    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { title: c => 'Hole ' + H[c[0].dataIndex].n + ' · par ' + H[c[0].dataIndex].par, label: c => c.raw + ' yards · daily-play No. ' + H[c.dataIndex].daily } } }, scales: { y: { min: 0, ticks: { callback: v => v + ' yd' } }, x: { grid: { display: false }, title: { display: true, text: 'Hole (2027 order) · cyan par 3 · purple par 4 · pink par 5', color: '#7a76a0' } } } } });
+    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { title: c => 'Hole ' + H[c[0].dataIndex].n + ' · par ' + H[c[0].dataIndex].par, label: c => c.raw + ' yards · daily-play No. ' + H[c.dataIndex].daily } } }, scales: { y: { min: 0, ticks: { callback: v => v + ' yd' } }, x: { grid: { display: false }, title: { display: true, text: 'Hole (2027 order) · cyan par 3 · purple par 4 · pink par 5', color: '#7890a8' } } } } });
   const sctx = $('#chHolesSim').getContext('2d');
   charts.holesSim = new Chart(sctx, { type: 'bar', data: { labels: H.map(h => h.n), datasets: [{ label: 'Fans at hole (simulated)', data: holesData(), backgroundColor: H.map(h => [9, 17, 18].includes(h.n) ? 'rgba(245,184,61,.85)' : 'rgba(245,184,61,.45)'), borderRadius: 4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => fmtK(v) } }, x: { grid: { display: false } } } } });
 }
@@ -373,7 +373,7 @@ function frisco() {
     { label: 'Restaurant traffic', data: mk(65), borderColor: C.cyan, tension: .35, pointRadius: 0, borderWidth: 2.5 },
     { label: 'Rideshare trips', data: mk(170), borderColor: C.orange, tension: .35, pointRadius: 0, borderWidth: 2.5 },
     { label: 'Retail spend', data: mk(40), borderColor: C.purple, tension: .35, pointRadius: 0, borderWidth: 2.5 }] },
-    options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Index · normal May week = 100 · championship week May 17–23 (simulated lift)', color: '#7a76a0' } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } } } } });
+    options: { interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Index · normal May week = 100 · championship week May 17–23 (simulated lift)', color: '#7890a8' } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } } } } });
   $('#wx').innerHTML = [['Normal May high', '83.6°F', 'nws'], ['Normal May rainfall', '4.78 in', 'nws'], ['May 2026: days at 90°F+', '9 (normal 6.9)', 'nwsMay'], ['May 2026 avg high', '84.7°F', 'nwsMay'], ['Wind', 'Golfers report 25–30 mph days', 'r1']].map(([a, b, s]) => `<li><span>${a}<small>${src(s)}</small></span><b>${b}</b></li>`).join('');
   $('#demo').innerHTML = [['Median age', '39.4', 'glance'], ['Owner-occupied homes', '63.7%', 'glance'], ['Asian · White · Black', '33.6% · 45.5% · 10.0%', 'glance'], ['Hispanic (any race)', '10.4%', 'glance'], ['Graduate degree', '28.2%', 'retail']].map(([a, b, s]) => `<li><span>${a}<small>${src(s)}</small></span><b>${b}</b></li>`).join('');
   corr();

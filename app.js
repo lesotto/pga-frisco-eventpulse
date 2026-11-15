@@ -24,7 +24,7 @@ const poiById = id => P.pois.find(p => p.id === id);
 const COURSE_C = { lat: 33.2069, lng: -96.85 };
 const holeGreen = n => { const l = C.holes[n - 1].line, g = l[l.length - 1]; return { lng: g[0], lat: g[1] }; };
 const holeTee = n => { const g = C.holes[n - 1].line[0]; return { lng: g[0], lat: g[1] }; };
-const CATS = { hosp: ['Hospitality', '#F07A2A'], view: ['Viewing spots', '#22C08A'], fan: ['PGA District & campus', '#4FD1E8'], stay: ['Resort', '#B78BFF'] };
+const CATS = { hosp: ['Hospitality', '#3FB67A'], view: ['Viewing spots', '#22C08A'], fan: ['PGA District & campus', '#4FD1E8'], stay: ['Resort', '#B78BFF'] };
 const driveMin = m => Math.max(5, Math.round(m * 1.3 / 1000 / 55 * 60));
 
 /* ---------- ticket products (official names) ---------- */
@@ -259,7 +259,7 @@ function vCourse() {
   const grpMk = new maplibregl.Marker({ element: ge }).setLngLat(C.holes[0].line[0]).addTo(mapObj);
   mapObj.on('load', () => {
     mapObj.addSource('course', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Polygon', coordinates: [C.poly] } } });
-    mapObj.addLayer({ id: 'c-line', type: 'line', source: 'course', paint: { 'line-color': '#E84C9A', 'line-width': 2.5, 'line-opacity': .9, 'line-dasharray': [2, 1] } });
+    mapObj.addLayer({ id: 'c-line', type: 'line', source: 'course', paint: { 'line-color': '#3A8DDE', 'line-width': 2.5, 'line-opacity': .9, 'line-dasharray': [2, 1] } });
     mapObj.addSource('holes', { type: 'geojson', data: { type: 'FeatureCollection', features: C.holes.map(h => ({ type: 'Feature', properties: { n: h.n }, geometry: { type: 'LineString', coordinates: h.line } })) } });
     mapObj.addLayer({ id: 'h-line', type: 'line', source: 'holes', paint: { 'line-color': '#ffffff', 'line-width': 2.5, 'line-opacity': .85 } });
     mapObj.addLayer({ id: 'h-sel', type: 'line', source: 'holes', filter: ['==', ['get', 'n'], -1], paint: { 'line-color': '#4FD1E8', 'line-width': 7 } });
@@ -384,7 +384,7 @@ function vFrisco() {
   { const lb = document.createElement('div'); lb.className = 'mk-lbl pga'; lb.textContent = 'PGA Frisco'; new maplibregl.Marker({ element: lb, anchor: 'left', offset: [16, 0] }).setLngLat([COURSE_C.lng, COURSE_C.lat]).addTo(mapObj); }
   new maplibregl.Marker({ element: pga }).setLngLat([COURSE_C.lng, COURSE_C.lat]).setPopup(new maplibregl.Popup({ offset: 14 }).setHTML('<b>PGA Frisco</b><br>Fields Ranch East')).addTo(mapObj);
   const mks = {};
-  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#4FD1E8' : '#22C08A'; const lb = document.createElement('div'); lb.className = 'mk-lbl'; lb.textContent = f.name; new maplibregl.Marker({ element: lb, anchor: f.id === 'toyota' ? 'right' : 'left', offset: f.id === 'toyota' ? [-12, 6] : [12, 0] }).setLngLat([f.lng, f.lat]).addTo(mapObj); mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#ff9fcf">Google Maps</a>`)).addTo(mapObj); });
+  list.forEach(f => { const el = document.createElement('div'); el.className = 'mk'; el.style.background = f.kind === 'Airport' ? '#4FD1E8' : '#22C08A'; const lb = document.createElement('div'); lb.className = 'mk-lbl'; lb.textContent = f.name; new maplibregl.Marker({ element: lb, anchor: f.id === 'toyota' ? 'right' : 'left', offset: f.id === 'toyota' ? [-12, 6] : [12, 0] }).setLngLat([f.lng, f.lat]).addTo(mapObj); mks[f.id] = new maplibregl.Marker({ element: el }).setLngLat([f.lng, f.lat]).setPopup(new maplibregl.Popup({ offset: 12 }).setHTML(`<b>${esc(f.name)}</b><br>~${driveMin(f.m)} min drive · <a href="${gmaps(f.lat, f.lng, 'driving')}" target="_blank" rel="noopener" style="color:#9fd2ff">Google Maps</a>`)).addTo(mapObj); });
   /* Rutgers-style 3D fly-around of Frisco */
   let tok = 0, touring = false; const P0 = [COURSE_C.lng, COURSE_C.lat], zA = mob ? -0.8 : 0;
   const camTo = (o, t) => new Promise(r => { if (t !== tok || !mapObj) return r(false); mapObj.once('moveend', () => r(t === tok)); mapObj.flyTo({ ...o, essential: true }); });
@@ -416,7 +416,7 @@ function vFrisco() {
   }
   mapObj.on('load', () => {
     mapObj.addSource('fr', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    mapObj.addLayer({ id: 'fr-glow', type: 'line', source: 'fr', paint: { 'line-color': '#E84C9A', 'line-width': 10, 'line-opacity': .35, 'line-blur': 6 } });
+    mapObj.addLayer({ id: 'fr-glow', type: 'line', source: 'fr', paint: { 'line-color': '#3A8DDE', 'line-width': 10, 'line-opacity': .35, 'line-blur': 6 } });
     mapObj.addLayer({ id: 'fr', type: 'line', source: 'fr', paint: { 'line-color': '#F5B83D', 'line-width': 3.5 } });
     $('#tBtn').onclick = () => touring ? stopTour() : startTour();
     ['mousedown', 'touchstart', 'wheel'].forEach(ev => mapObj.on(ev, () => stopTour()));

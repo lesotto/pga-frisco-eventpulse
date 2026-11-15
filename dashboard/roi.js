@@ -15,7 +15,7 @@ const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'nume
 
 function gauge(v, sim) {
   const L = 2 * Math.PI * 46, off = sim ? L * (1 - v / 100) : L;
-  return `<svg viewBox="0 0 110 110" class="gauge"><defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#E84C9A"/><stop offset="1" stop-color="#F07A2A"/></linearGradient></defs>
+  return `<svg viewBox="0 0 110 110" class="gauge"><defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#3A8DDE"/><stop offset="1" stop-color="#3FB67A"/></linearGradient></defs>
     <circle cx="55" cy="55" r="46" fill="none" stroke="#ece9f6" stroke-width="10"/>
     <circle cx="55" cy="55" r="46" fill="none" stroke="url(#gg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${off}" transform="rotate(-90 55 55)"/>
     <text x="55" y="58" text-anchor="middle" class="g-n">${sim ? v : '—'}</text><text x="55" y="76" text-anchor="middle" class="g-l">EOS</text></svg>`;
@@ -37,7 +37,7 @@ function scatter(sel, sim) {
 function page(r) {
   const sim = st.mode === 'sim', s = r.s, [bl, bc] = band(r.eos), v = x => sim ? x : '—';
   const srcA = S[s.s] ? `<a href="${S[s.s][1]}">${esc(S[s.s][0])}</a> · ${esc(S[s.s][1])}` : '';
-  const comp = [['Exposure', 'Impressions', r.exp, r.c.exp, .30, '#4FD1E8'], ['Behavior', 'Visits, dwell, taps', r.beh, r.c.beh, .25, '#8B5CF6'], ['Sentiment', 'Net score / 100', r.sent, r.c.sent, .15, '#22C08A'], ['Redemptions', 'Offers claimed', r.red, r.c.red, .30, '#E84C9A']];
+  const comp = [['Exposure', 'Impressions', r.exp, r.c.exp, .30, '#4FD1E8'], ['Behavior', 'Visits, dwell, taps', r.beh, r.c.beh, .25, '#5B7FE0'], ['Sentiment', 'Net score / 100', r.sent, r.c.sent, .15, '#22C08A'], ['Redemptions', 'Offers claimed', r.red, r.c.red, .30, '#3A8DDE']];
   const val = [['Activation investment', r.inv, 'Illustrative championship-week activation spend (not the rights fee)'], ['Media value', r.media, `Impressions × $${R.cpm} CPM`], ['Engagement value', r.eng, `Behaviors × $${R.beh.toFixed(2)}`], ['Redemption margin', r.rev, `Redemptions × $${R.aov} order × ${R.margin * 100}%`]];
   return `<section class="pg ${sim ? 'is-sim' : 'is-real'}">
   <header class="ph-h"><div class="brand"><span class="logo"><i></i></span><div><b>EVENTPULSE<em>.AI</em></b><small>Sponsor ROI Summary · Event Outcome Ledger</small></div></div>
