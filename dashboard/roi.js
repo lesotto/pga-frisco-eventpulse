@@ -84,7 +84,7 @@ function render() {
   $('#pages').innerHTML = rows.map(page).join('');
   $$('#mode button').forEach(b => b.classList.toggle('on', b.dataset.m === st.mode));
   $('#pick').value = st.s; $('#pick').disabled = st.all; $('#all').checked = st.all;
-  document.title = `${st.all ? 'All sponsors' : st.s} · Sponsor ROI Summary · EventPulse`;
+  document.title = `${st.all ? 'All sponsors' : st.s} · Sponsor ROI Summary · EventPulse Demo: 2027 PGA Championship at PGA Frisco`;
   const u = new URLSearchParams({ s: st.s, mode: st.mode }); if (st.all) u.set('all', '1'); history.replaceState(null, '', '?' + u);
 }
 function $$(s) { return [...document.querySelectorAll(s)]; }
